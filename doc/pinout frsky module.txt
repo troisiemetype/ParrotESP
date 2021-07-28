@@ -1,0 +1,6 @@
+From up to down :
+TX			CPPM
+RX			HeatBeat
+Vout
+Gnd
+S.port

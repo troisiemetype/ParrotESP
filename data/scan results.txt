@@ -1,0 +1,99 @@
+Rolling Spider scan esp32 :
+Advertised Device: Name: RS_W272954, Address: a0:14:3d:68:51:ba, manufacturer data: 4300cf1900090100 
+
+Services : 
+( connected to a0:14:3d:68:51:ba )
+Service: uuid: 00001800-0000-1000-8000-00805f9b34fb, start_handle: 1 0x0001, end_handle: 7 0x0007				(device name + appearance)
+Service: uuid: 00001801-0000-1000-8000-00805f9b34fb, start_handle: 16 0x0010, end_handle: 18 0x0012				(service changed)
+Service: uuid: 9a66fa00-0800-9191-11e4-012d1540cb8e, start_handle: 32 0x0020, end_handle: 128 0x0080			ARcommand sending service
+Service: uuid: 9a66fb00-0800-9191-11e4-012d1540cb8e, start_handle: 144 0x0090, end_handle: 240 0x00f0			ARcommand receiving service
+Service: uuid: 9a66fc00-0800-9191-11e4-012d1540cb8e, start_handle: 256 0x0100, end_handle: 259 0x0103			performance counter service
+Service: uuid: 9a66fd21-0800-9191-11e4-012d1540cb8e, start_handle: 272 0x0110, end_handle: 281 0x0119			normal ble ftp service
+Service: uuid: 9a66fd51-0800-9191-11e4-012d1540cb8e, start_handle: 288 0x0120, end_handle: 65535 0xffff			update ble ftp service
+
+
+
+found 7 services :
+Service: uuid: 00001800-0000-1000-8000-00805f9b34fb, start_handle: 1 0x0001, end_handle: 7 0x0007
+	Characteristic: uuid: 00002a00-0000-1000-8000-00805f9b34fb, handle: 3 0x0003, props: broadcast: 0, read: 1, write_nr: 0, write: 0, notify: 0, indicate: 0, auth: 0
+	Characteristic: uuid: 00002a01-0000-1000-8000-00805f9b34fb, handle: 5 0x0005, props: broadcast: 0, read: 1, write_nr: 0, write: 0, notify: 0, indicate: 0, auth: 0
+	Characteristic: uuid: 00002a04-0000-1000-8000-00805f9b34fb, handle: 7 0x0007, props: broadcast: 0, read: 1, write_nr: 0, write: 0, notify: 0, indicate: 0, auth: 0
+Service: uuid: 00001801-0000-1000-8000-00805f9b34fb, start_handle: 16 0x0010, end_handle: 18 0x0012
+	Characteristic: uuid: 00002a05-0000-1000-8000-00805f9b34fb, handle: 18 0x0012, props: broadcast: 0, read: 0, write_nr: 0, write: 0, notify: 0, indicate: 1, auth: 0
+Service: uuid: 9a66fa00-0800-9191-11e4-012d1540cb8e, start_handle: 32 0x0020, end_handle: 128 0x0080
+	Characteristic: uuid: 9a66fa00-0800-9191-11e4-012d1540cb8e, handle: 34 0x0022, props: broadcast: 0, read: 0, write_nr: 1, write: 0, notify: 0, indicate: 0, auth: 0
+	Characteristic: uuid: 9a66fa01-0800-9191-11e4-012d1540cb8e, handle: 37 0x0025, props: broadcast: 0, read: 0, write_nr: 1, write: 0, notify: 0, indicate: 0, auth: 0
+	Characteristic: uuid: 9a66fa02-0800-9191-11e4-012d1540cb8e, handle: 40 0x0028, props: broadcast: 0, read: 0, write_nr: 1, write: 0, notify: 0, indicate: 0, auth: 0
+	Characteristic: uuid: 9a66fa03-0800-9191-11e4-012d1540cb8e, handle: 43 0x002b, props: broadcast: 0, read: 0, write_nr: 1, write: 0, notify: 0, indicate: 0, auth: 0
+	Characteristic: uuid: 9a66fa04-0800-9191-11e4-012d1540cb8e, handle: 46 0x002e, props: broadcast: 0, read: 0, write_nr: 1, write: 0, notify: 0, indicate: 0, auth: 0
+	Characteristic: uuid: 9a66fa05-0800-9191-11e4-012d1540cb8e, handle: 49 0x0031, props: broadcast: 0, read: 0, write_nr: 1, write: 0, notify: 0, indicate: 0, auth: 0
+	Characteristic: uuid: 9a66fa06-0800-9191-11e4-012d1540cb8e, handle: 52 0x0034, props: broadcast: 0, read: 0, write_nr: 1, write: 0, notify: 0, indicate: 0, auth: 0
+	Characteristic: uuid: 9a66fa07-0800-9191-11e4-012d1540cb8e, handle: 55 0x0037, props: broadcast: 0, read: 0, write_nr: 1, write: 0, notify: 0, indicate: 0, auth: 0
+	Characteristic: uuid: 9a66fa08-0800-9191-11e4-012d1540cb8e, handle: 58 0x003a, props: broadcast: 0, read: 0, write_nr: 1, write: 0, notify: 0, indicate: 0, auth: 0
+	Characteristic: uuid: 9a66fa09-0800-9191-11e4-012d1540cb8e, handle: 61 0x003d, props: broadcast: 0, read: 0, write_nr: 1, write: 0, notify: 0, indicate: 0, auth: 0
+	Characteristic: uuid: 9a66fa0a-0800-9191-11e4-012d1540cb8e, handle: 64 0x0040, props: broadcast: 0, read: 0, write_nr: 1, write: 0, notify: 0, indicate: 0, auth: 0
+	Characteristic: uuid: 9a66fa0b-0800-9191-11e4-012d1540cb8e, handle: 67 0x0043, props: broadcast: 0, read: 0, write_nr: 1, write: 0, notify: 0, indicate: 0, auth: 0
+	Characteristic: uuid: 9a66fa0c-0800-9191-11e4-012d1540cb8e, handle: 70 0x0046, props: broadcast: 0, read: 0, write_nr: 1, write: 0, notify: 0, indicate: 0, auth: 0
+	Characteristic: uuid: 9a66fa0d-0800-9191-11e4-012d1540cb8e, handle: 73 0x0049, props: broadcast: 0, read: 0, write_nr: 1, write: 0, notify: 0, indicate: 0, auth: 0
+	Characteristic: uuid: 9a66fa0e-0800-9191-11e4-012d1540cb8e, handle: 76 0x004c, props: broadcast: 0, read: 0, write_nr: 1, write: 0, notify: 0, indicate: 0, auth: 0
+	Characteristic: uuid: 9a66fa0f-0800-9191-11e4-012d1540cb8e, handle: 79 0x004f, props: broadcast: 0, read: 0, write_nr: 1, write: 0, notify: 0, indicate: 0, auth: 0
+	Characteristic: uuid: 9a66fa10-0800-9191-11e4-012d1540cb8e, handle: 82 0x0052, props: broadcast: 0, read: 0, write_nr: 1, write: 0, notify: 0, indicate: 0, auth: 0
+	Characteristic: uuid: 9a66fa11-0800-9191-11e4-012d1540cb8e, handle: 85 0x0055, props: broadcast: 0, read: 0, write_nr: 1, write: 0, notify: 0, indicate: 0, auth: 0
+	Characteristic: uuid: 9a66fa12-0800-9191-11e4-012d1540cb8e, handle: 88 0x0058, props: broadcast: 0, read: 0, write_nr: 1, write: 0, notify: 0, indicate: 0, auth: 0
+	Characteristic: uuid: 9a66fa13-0800-9191-11e4-012d1540cb8e, handle: 91 0x005b, props: broadcast: 0, read: 0, write_nr: 1, write: 0, notify: 0, indicate: 0, auth: 0
+	Characteristic: uuid: 9a66fa14-0800-9191-11e4-012d1540cb8e, handle: 94 0x005e, props: broadcast: 0, read: 0, write_nr: 1, write: 0, notify: 0, indicate: 0, auth: 0
+	Characteristic: uuid: 9a66fa15-0800-9191-11e4-012d1540cb8e, handle: 97 0x0061, props: broadcast: 0, read: 0, write_nr: 1, write: 0, notify: 0, indicate: 0, auth: 0
+	Characteristic: uuid: 9a66fa16-0800-9191-11e4-012d1540cb8e, handle: 100 0x0064, props: broadcast: 0, read: 0, write_nr: 1, write: 0, notify: 0, indicate: 0, auth: 0
+	Characteristic: uuid: 9a66fa17-0800-9191-11e4-012d1540cb8e, handle: 103 0x0067, props: broadcast: 0, read: 0, write_nr: 1, write: 0, notify: 0, indicate: 0, auth: 0
+	Characteristic: uuid: 9a66fa18-0800-9191-11e4-012d1540cb8e, handle: 106 0x006a, props: broadcast: 0, read: 0, write_nr: 1, write: 0, notify: 0, indicate: 0, auth: 0
+	Characteristic: uuid: 9a66fa19-0800-9191-11e4-012d1540cb8e, handle: 109 0x006d, props: broadcast: 0, read: 0, write_nr: 1, write: 0, notify: 0, indicate: 0, auth: 0
+	Characteristic: uuid: 9a66fa1a-0800-9191-11e4-012d1540cb8e, handle: 112 0x0070, props: broadcast: 0, read: 0, write_nr: 1, write: 0, notify: 0, indicate: 0, auth: 0
+	Characteristic: uuid: 9a66fa1b-0800-9191-11e4-012d1540cb8e, handle: 115 0x0073, props: broadcast: 0, read: 0, write_nr: 1, write: 0, notify: 0, indicate: 0, auth: 0
+	Characteristic: uuid: 9a66fa1c-0800-9191-11e4-012d1540cb8e, handle: 118 0x0076, props: broadcast: 0, read: 0, write_nr: 1, write: 0, notify: 0, indicate: 0, auth: 0
+	Characteristic: uuid: 9a66fa1d-0800-9191-11e4-012d1540cb8e, handle: 121 0x0079, props: broadcast: 0, read: 0, write_nr: 1, write: 0, notify: 0, indicate: 0, auth: 0
+	Characteristic: uuid: 9a66fa1e-0800-9191-11e4-012d1540cb8e, handle: 124 0x007c, props: broadcast: 0, read: 0, write_nr: 1, write: 0, notify: 0, indicate: 0, auth: 0
+	Characteristic: uuid: 9a66fa1f-0800-9191-11e4-012d1540cb8e, handle: 127 0x007f, props: broadcast: 0, read: 0, write_nr: 1, write: 0, notify: 0, indicate: 0, auth: 0
+Service: uuid: 9a66fb00-0800-9191-11e4-012d1540cb8e, start_handle: 144 0x0090, end_handle: 240 0x00f0
+	Characteristic: uuid: 9a66fb00-0800-9191-11e4-012d1540cb8e, handle: 146 0x0092, props: broadcast: 0, read: 0, write_nr: 0, write: 0, notify: 1, indicate: 0, auth: 0
+	Characteristic: uuid: 9a66fb01-0800-9191-11e4-012d1540cb8e, handle: 149 0x0095, props: broadcast: 0, read: 0, write_nr: 0, write: 0, notify: 1, indicate: 0, auth: 0
+	Characteristic: uuid: 9a66fb02-0800-9191-11e4-012d1540cb8e, handle: 152 0x0098, props: broadcast: 0, read: 0, write_nr: 0, write: 0, notify: 1, indicate: 0, auth: 0
+	Characteristic: uuid: 9a66fb03-0800-9191-11e4-012d1540cb8e, handle: 155 0x009b, props: broadcast: 0, read: 0, write_nr: 0, write: 0, notify: 1, indicate: 0, auth: 0
+	Characteristic: uuid: 9a66fb04-0800-9191-11e4-012d1540cb8e, handle: 158 0x009e, props: broadcast: 0, read: 0, write_nr: 0, write: 0, notify: 1, indicate: 0, auth: 0
+	Characteristic: uuid: 9a66fb05-0800-9191-11e4-012d1540cb8e, handle: 161 0x00a1, props: broadcast: 0, read: 0, write_nr: 0, write: 0, notify: 1, indicate: 0, auth: 0
+	Characteristic: uuid: 9a66fb06-0800-9191-11e4-012d1540cb8e, handle: 164 0x00a4, props: broadcast: 0, read: 0, write_nr: 0, write: 0, notify: 1, indicate: 0, auth: 0
+	Characteristic: uuid: 9a66fb07-0800-9191-11e4-012d1540cb8e, handle: 167 0x00a7, props: broadcast: 0, read: 0, write_nr: 0, write: 0, notify: 1, indicate: 0, auth: 0
+	Characteristic: uuid: 9a66fb08-0800-9191-11e4-012d1540cb8e, handle: 170 0x00aa, props: broadcast: 0, read: 0, write_nr: 0, write: 0, notify: 1, indicate: 0, auth: 0
+	Characteristic: uuid: 9a66fb09-0800-9191-11e4-012d1540cb8e, handle: 173 0x00ad, props: broadcast: 0, read: 0, write_nr: 0, write: 0, notify: 1, indicate: 0, auth: 0
+	Characteristic: uuid: 9a66fb0a-0800-9191-11e4-012d1540cb8e, handle: 176 0x00b0, props: broadcast: 0, read: 0, write_nr: 0, write: 0, notify: 1, indicate: 0, auth: 0
+	Characteristic: uuid: 9a66fb0b-0800-9191-11e4-012d1540cb8e, handle: 179 0x00b3, props: broadcast: 0, read: 0, write_nr: 0, write: 0, notify: 1, indicate: 0, auth: 0
+	Characteristic: uuid: 9a66fb0c-0800-9191-11e4-012d1540cb8e, handle: 182 0x00b6, props: broadcast: 0, read: 0, write_nr: 0, write: 0, notify: 1, indicate: 0, auth: 0
+	Characteristic: uuid: 9a66fb0d-0800-9191-11e4-012d1540cb8e, handle: 185 0x00b9, props: broadcast: 0, read: 0, write_nr: 0, write: 0, notify: 1, indicate: 0, auth: 0
+	Characteristic: uuid: 9a66fb0e-0800-9191-11e4-012d1540cb8e, handle: 188 0x00bc, props: broadcast: 0, read: 0, write_nr: 0, write: 0, notify: 1, indicate: 0, auth: 0
+	Characteristic: uuid: 9a66fb0f-0800-9191-11e4-012d1540cb8e, handle: 191 0x00bf, props: broadcast: 0, read: 0, write_nr: 0, write: 0, notify: 1, indicate: 0, auth: 0
+	Characteristic: uuid: 9a66fb10-0800-9191-11e4-012d1540cb8e, handle: 194 0x00c2, props: broadcast: 0, read: 0, write_nr: 0, write: 0, notify: 1, indicate: 0, auth: 0
+	Characteristic: uuid: 9a66fb11-0800-9191-11e4-012d1540cb8e, handle: 197 0x00c5, props: broadcast: 0, read: 0, write_nr: 0, write: 0, notify: 1, indicate: 0, auth: 0
+	Characteristic: uuid: 9a66fb12-0800-9191-11e4-012d1540cb8e, handle: 200 0x00c8, props: broadcast: 0, read: 0, write_nr: 0, write: 0, notify: 1, indicate: 0, auth: 0
+	Characteristic: uuid: 9a66fb13-0800-9191-11e4-012d1540cb8e, handle: 203 0x00cb, props: broadcast: 0, read: 0, write_nr: 0, write: 0, notify: 1, indicate: 0, auth: 0
+	Characteristic: uuid: 9a66fb14-0800-9191-11e4-012d1540cb8e, handle: 206 0x00ce, props: broadcast: 0, read: 0, write_nr: 0, write: 0, notify: 1, indicate: 0, auth: 0
+	Characteristic: uuid: 9a66fb15-0800-9191-11e4-012d1540cb8e, handle: 209 0x00d1, props: broadcast: 0, read: 0, write_nr: 0, write: 0, notify: 1, indicate: 0, auth: 0
+	Characteristic: uuid: 9a66fb16-0800-9191-11e4-012d1540cb8e, handle: 212 0x00d4, props: broadcast: 0, read: 0, write_nr: 0, write: 0, notify: 1, indicate: 0, auth: 0
+	Characteristic: uuid: 9a66fb17-0800-9191-11e4-012d1540cb8e, handle: 215 0x00d7, props: broadcast: 0, read: 0, write_nr: 0, write: 0, notify: 1, indicate: 0, auth: 0
+	Characteristic: uuid: 9a66fb18-0800-9191-11e4-012d1540cb8e, handle: 218 0x00da, props: broadcast: 0, read: 0, write_nr: 0, write: 0, notify: 1, indicate: 0, auth: 0
+	Characteristic: uuid: 9a66fb19-0800-9191-11e4-012d1540cb8e, handle: 221 0x00dd, props: broadcast: 0, read: 0, write_nr: 0, write: 0, notify: 1, indicate: 0, auth: 0
+	Characteristic: uuid: 9a66fb1a-0800-9191-11e4-012d1540cb8e, handle: 224 0x00e0, props: broadcast: 0, read: 0, write_nr: 0, write: 0, notify: 1, indicate: 0, auth: 0
+	Characteristic: uuid: 9a66fb1b-0800-9191-11e4-012d1540cb8e, handle: 227 0x00e3, props: broadcast: 0, read: 0, write_nr: 0, write: 0, notify: 1, indicate: 0, auth: 0
+	Characteristic: uuid: 9a66fb1c-0800-9191-11e4-012d1540cb8e, handle: 230 0x00e6, props: broadcast: 0, read: 0, write_nr: 0, write: 0, notify: 1, indicate: 0, auth: 0
+	Characteristic: uuid: 9a66fb1d-0800-9191-11e4-012d1540cb8e, handle: 233 0x00e9, props: broadcast: 0, read: 0, write_nr: 0, write: 0, notify: 1, indicate: 0, auth: 0
+	Characteristic: uuid: 9a66fb1e-0800-9191-11e4-012d1540cb8e, handle: 236 0x00ec, props: broadcast: 0, read: 0, write_nr: 0, write: 0, notify: 1, indicate: 0, auth: 0
+	Characteristic: uuid: 9a66fb1f-0800-9191-11e4-012d1540cb8e, handle: 239 0x00ef, props: broadcast: 0, read: 0, write_nr: 0, write: 0, notify: 1, indicate: 0, auth: 0
+Service: uuid: 9a66fc00-0800-9191-11e4-012d1540cb8e, start_handle: 256 0x0100, end_handle: 259 0x0103
+	Characteristic: uuid: 9a66ffc1-0800-9191-11e4-012d1540cb8e, handle: 258 0x0102, props: broadcast: 0, read: 0, write_nr: 1, write: 1, notify: 0, indicate: 0, auth: 0
+Service: uuid: 9a66fd21-0800-9191-11e4-012d1540cb8e, start_handle: 272 0x0110, end_handle: 281 0x0119
+	Characteristic: uuid: 9a66fd22-0800-9191-11e4-012d1540cb8e, handle: 274 0x0112, props: broadcast: 0, read: 1, write_nr: 1, write: 1, notify: 1, indicate: 0, auth: 0
+	Characteristic: uuid: 9a66fd23-0800-9191-11e4-012d1540cb8e, handle: 277 0x0115, props: broadcast: 0, read: 1, write_nr: 1, write: 1, notify: 1, indicate: 0, auth: 0
+	Characteristic: uuid: 9a66fd24-0800-9191-11e4-012d1540cb8e, handle: 280 0x0118, props: broadcast: 0, read: 1, write_nr: 1, write: 1, notify: 1, indicate: 0, auth: 0
+Service: uuid: 9a66fd51-0800-9191-11e4-012d1540cb8e, start_handle: 288 0x0120, end_handle: 65535 0xffff
+	Characteristic: uuid: 9a66fd52-0800-9191-11e4-012d1540cb8e, handle: 290 0x0122, props: broadcast: 0, read: 1, write_nr: 1, write: 1, notify: 1, indicate: 0, auth: 0
+	Characteristic: uuid: 9a66fd53-0800-9191-11e4-012d1540cb8e, handle: 293 0x0125, props: broadcast: 0, read: 1, write_nr: 1, write: 1, notify: 1, indicate: 0, auth: 0
+	Characteristic: uuid: 9a66fd54-0800-9191-11e4-012d1540cb8e, handle: 296 0x0128, props: broadcast: 0, read: 1, write_nr: 1, write: 1, notify: 1, indicate: 0, auth: 0
+end of services

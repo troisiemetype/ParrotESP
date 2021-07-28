@@ -1,0 +1,20 @@
+
+data frame formatting :
+	data type 								(1 byte)
+	sequence number							(1 byte)
+	actual data :
+		project or feature ID 				(1 byte)
+		class ID of the feature / project 	(1 byte)
+		command ID in the class 			(2 bytes)
+		values 								(<= 14 bytes)
+
+data types :
+	Ack 				1
+	Data 				2
+	Low latency data	3
+	Data with Ack 		4
+
+ack formatting :
+	Ack data type 				(1 byte)
+	sequence number				(1 byte)
+	received sequence number	(1 byte)
