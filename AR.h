@@ -5,6 +5,17 @@
 
 #include "parrot_esp.h"
 
+enum arFlyingState_t{
+	FLYING_STATE_LANDED,
+	FLYING_STATE_TAKINGOFF,
+	FLYING_STATE_HOVERING,
+	FLYING_STATE_FLYING,
+	FLYING_STATE_LANDING,
+	FLYING_STATE_EMERGENCY,
+	FLYING_STATE_ROLLING,
+	FLYING_STATE_INIT,
+};
+
 struct minidroneState_t{
 	uint8_t battery;									// 0/5/1 		common/commonState/batteryStateChanged
 
@@ -14,7 +25,7 @@ struct minidroneState_t{
 	uint8_t headlightLeft;								// 0/23/0		common/headlightsState/intensityChanged
 	uint8_t headlightRight;
 
-	bool flyingState;									// 2/3/1 		minidrone/pilotingState/flyingStateChanged
+	arFlyingState_t flyingState;									// 2/3/1 		minidrone/pilotingState/flyingStateChanged
 	// todo : manage alert from minidrone/pilotingState/Alerts
 
 	uint8_t pilotingMode;									// 2/3/6 		minidrone/pilotingState/pilotingModeChanged
@@ -93,6 +104,13 @@ enum{
 	MD_REMOTE_CONTROLLER_STATE,
 } ar_minidroneClasses;
 
+void ar_init();
+void ar_initBuffers();
+void ar_setBuffer(arBuffer_t* buffer, arBufferQueue_t* queue, size_t size);
+
+void ar_bufferState(arBufferQueue_t* queue, char* name, bool displayBuffer = false);
+void ar_bufferContent(arBuffer_t* buffer);
+
 void ar_populateReceiveBuffer(arFrameType_t, uint8_t* data, uint8_t length);
 void ar_populateSendBuffer(arFrameType_t, uint8_t* data, uint8_t length);
 
@@ -112,11 +130,11 @@ void ar_processMinidronePilotingState(uint8_t* data, size_t length);
 
 void ar_processUnused(uint8_t* data, size_t length);
 
-void ar_sendAskForSettings();
+void ar_sendAllSettings();
 
-void ar_sendFlatrim();
+void ar_sendFlatTrim();
 void ar_sendTakeOff();
-void ar_sendPCMD(int8_t roll, int8_t pitch, int8_t yaw, int8_t gaz, bool rollPitchFlag);
+void ar_sendPCMD(int8_t roll, int8_t pitch, int8_t yaw, int8_t gaz, bool rollPitchFlag = true);
 void ar_sendLanding();
 void ar_sendEmergency();
 void ar_sendAutoTakeOffMode(uint8_t autoTakeOffMode);

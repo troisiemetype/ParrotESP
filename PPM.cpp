@@ -16,9 +16,9 @@ void ppm_init(){
 	ppmTimer = timerBegin(0, 80, true);
 }
 
-void ppm_update(){
+bool ppm_update(){
 //	Serial.println(timerRead(ppmTimer));
-	if(!ppmData) return;
+	if(!ppmData) return false;
 	ppmData = 0;
 
 	for(uint8_t i = 0; i < NUM_CHANNELS; ++i){
@@ -27,6 +27,8 @@ void ppm_update(){
 		portEXIT_CRITICAL_ISR(&ppmMux);
 	}
 
+	return true;
+
 /*
 	Serial.printf("channels :\t");
 	for(uint8_t i = 0; i < NUM_CHANNELS; ++i){
@@ -34,6 +36,10 @@ void ppm_update(){
 	}
 	Serial.println();
 */
+}
+
+int16_t* ppm_getChannels(){
+	return channel;
 }
 
 void IRAM_ATTR ppm_isr(){

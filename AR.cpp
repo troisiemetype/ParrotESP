@@ -1,14 +1,17 @@
 #include "AR.h"
 
+const size_t SEND_BUFFER_SIZE = 32;
+const size_t RECEIVE_BUFFER_SIZE = 32;
+const size_t ACK_BUFFER_SIZE = 16;
 
-CircularBuffer<arBuffer_t, 16> bufferReceiveCommand;
-CircularBuffer<arBuffer_t, 16> bufferReceiveCommandAck;
-CircularBuffer<arBuffer_t, 16> bufferReceiveAck;
+arBuffer_t sendBuffer[SEND_BUFFER_SIZE];
+arBufferQueue_t sendQueue;
 
-CircularBuffer<arBuffer_t, 16> bufferSendAck;
-CircularBuffer<arBuffer_t, 16> bufferSendCommand;
-CircularBuffer<arBuffer_t, 16> bufferSendCommandAck;
-CircularBuffer<arBuffer_t, 16> bufferSendLowLatency;
+arBuffer_t receiveBuffer[RECEIVE_BUFFER_SIZE];
+arBufferQueue_t receiveQueue;
+
+arBuffer_t ackBuffer[ACK_BUFFER_SIZE];
+arBufferQueue_t ackQueue;
 
 uint8_t sequenceNumberAck = 0;
 uint8_t sequenceNumberCommand = 0;
@@ -18,121 +21,148 @@ uint8_t sequenceNumberCommandAck = 0;
 
 minidroneState_t minidroneState;
 
-void ar_populateReceiveBuffer(arFrameType_t frameType, uint8_t* data, uint8_t length){
-	arBuffer_t temp;
+void ar_init(){
+	ar_initBuffers();
+}
 
-	temp.frameType = frameType;
-	temp.sequenceNumber = data[1];
-	temp.length = length - 2;
+void ar_initBuffers(){
+	ar_setBuffer(sendBuffer, &sendQueue, SEND_BUFFER_SIZE);
+	ar_setBuffer(receiveBuffer, &receiveQueue, RECEIVE_BUFFER_SIZE);
+	ar_setBuffer(ackBuffer, &ackQueue, ACK_BUFFER_SIZE);
+//	ar_bufferState(&sendQueue, "send");
+//	ar_bufferState(&receiveQueue, "receive");
+//	ar_bufferState(&ackQueue, "ack");
+}
+
+void ar_setBuffer(arBuffer_t* buffer, arBufferQueue_t* queue, size_t size){
+	memset(buffer, 0, sizeof(arBuffer_t) * size);
+
+	uint8_t limit = size - 1;
+	for(uint8_t i = 0; i < size; ++i){
+		if(i > 0) buffer[i].prev = &buffer[i - 1];
+		if(i < limit) buffer[i].next = &buffer[i + 1];
+	}
+
+	buffer[0].prev = &buffer[limit];
+	buffer[limit].next = buffer;
+
+	queue->start = buffer;
+	queue->end = buffer->prev;
+	queue->run = buffer;
+	queue->write = buffer;
+	queue->size = size;
+	queue->room = size;
+}
+
+void ar_bufferState(arBufferQueue_t* queue, char* name, bool displayBuffer){
+	Serial.printf("%s buffer ; used :  %i/%i\n", name, (queue->size - queue->room), queue->size);
+	if(displayBuffer) ar_bufferContent(queue->write);
+}
+
+void ar_bufferContent(arBuffer_t* buffer){
+
+}
+
+
+void ar_populateReceiveBuffer(arFrameType_t frameType, uint8_t* data, uint8_t length){
+	if(receiveQueue.room <= 0) return;
+
+	arBuffer_t *bf = receiveQueue.write;
+
+	bf->frameType = frameType;
+	bf->sequenceNumber = data[1];
 
 	data += 2;
 	length -= 2;
 
-	memcpy(temp.data, data, length);
+	bf->length = length;
 
-	switch(frameType){
-		case FRAME_TYPE_ACK:
-			bufferReceiveAck.write(temp);
-			break;
-		case FRAME_TYPE_DATA:
-			bufferReceiveCommand.write(temp);
-			break;
-		case FRAME_TYPE_LOW_LATENCY:
-		case FRAME_TYPE_DATA_WITH_ACK:
-			bufferReceiveCommandAck.write(temp);
-			break;
-	}
+	memcpy(bf->data, data, length);
+
+//	ar_bufferState(&receiveQueue, "queued, receive");
+
+	receiveQueue.write = bf->next;
+	receiveQueue.room--;
+
 }
 
 void ar_populateSendBuffer(arFrameType_t frameType, uint8_t* data, uint8_t length){
-	arBuffer_t temp;
+	if(sendQueue.room <= 0) return;
 
-	temp.frameType = frameType;
-	temp.length = length;
-	memcpy(temp.data, data, length);
+	arBuffer_t *bf;
+
+	if(frameType == FRAME_TYPE_LOW_LATENCY){
+		bf = sendQueue.run->prev;
+	} else {
+		bf = sendQueue.write;
+	}
+
+	bf->frameType = frameType;
+	bf->length = length;
+	memcpy(bf->data, data, length);
 
 	switch(frameType){
 		case FRAME_TYPE_ACK:
-			temp.sequenceNumber = sequenceNumberAck++;
-			bufferSendAck.write(temp);
+			bf->sequenceNumber = sequenceNumberAck++;
 			break;
 		case FRAME_TYPE_DATA:
-			temp.sequenceNumber = sequenceNumberCommand++;
-			bufferSendCommand.write(temp);
+			bf->sequenceNumber = sequenceNumberCommand++;
 			break;
 		case FRAME_TYPE_LOW_LATENCY:
-			temp.sequenceNumber = sequenceNumberLowLatency++;
-			bufferSendLowLatency.write(temp);
+			bf->sequenceNumber = sequenceNumberLowLatency++;
 			break;
 		case FRAME_TYPE_DATA_WITH_ACK:
-			temp.sequenceNumber = sequenceNumberCommandAck++;
-			bufferSendCommandAck.write(temp);
+			bf->sequenceNumber = sequenceNumberCommandAck++;
 			break;
 	}
-/*
-	Serial.printf("populating send buffer with %i bytes : %i %i ", temp.length + 2, temp.frameType, temp.sequenceNumber);
-	for(uint8_t i = 0; i < temp.length; ++i){
-		Serial.printf("%i ", temp.data[i]);
+
+	if(frameType == FRAME_TYPE_LOW_LATENCY){
+		sendQueue.run = bf;
+	} else {
+		sendQueue.write = bf->next;
 	}
-	Serial.println();
-*/
+	sendQueue.room--;
+
+//	ar_bufferState(&sendQueue, "queued, send");
 }
 
 void ar_checkReceiveBuffer(){
-	arBuffer_t temp;
+	if(receiveQueue.room == receiveQueue.size) return;
+	
+	arBuffer_t *bf = receiveQueue.run;
 
-	if(bufferReceiveAck.available()){
-
+	switch(bf->frameType){
+		case FRAME_TYPE_DATA:
+			ar_unpackFrame(bf->data, bf->length);
+			break;
+		case FRAME_TYPE_DATA_WITH_ACK:
+			ar_populateSendBuffer(FRAME_TYPE_ACK, &(bf->sequenceNumber), 1);
+			ar_unpackFrame(bf->data, bf->length);
+			break;
+		case FRAME_TYPE_ACK:
+			// todo
+			receiveQueue.run = receiveQueue.run->next;
+			receiveQueue.room++;
+//			ar_bufferState(&receiveQueue, "processed, receive");
+			break;
+		default:
+			break;
 	}
 
-	if(bufferReceiveCommandAck.available()){
-		temp = bufferReceiveCommandAck.read();
-		ar_populateSendBuffer(FRAME_TYPE_ACK, &temp.sequenceNumber, 1);
-		ar_unpackFrame(temp.data, temp.length);
-	}
-
-	if(bufferReceiveCommand.available()){
-		temp = bufferReceiveCommand.read();
-		ar_unpackFrame(temp.data, temp.length);
-	}
 }
 
 void ar_checkSendBuffer(){
-	arBuffer_t temp;
-	uint8_t* start;
-	bool send = true;
+	if(sendQueue.room == sendQueue.size) return;
+	ble_sendFrame(sendQueue.run, sendQueue.run->length);
+	sendQueue.run = sendQueue.run->next;
+	sendQueue.room++;
 
-	if(bufferSendLowLatency.available()){
-//		start = (uint8_t*)bufferSendLowLatency.tail();
-		temp = bufferSendLowLatency.read();
-	} else if(bufferSendAck.available()){
-//		start = (uint8_t*)bufferSendAck.tail();
-		temp = bufferSendAck.read();
-	} else if(bufferSendCommand.available()){
-//		start = (uint8_t*)bufferSendCommand.tail();
-		temp = bufferSendCommand.read();
-	} else if(bufferSendCommandAck.available()){
-//		start = (uint8_t*)bufferSendCommandAck.tail();
-		temp = bufferSendCommandAck.read();
-	} else {
-		send = false;
-	}
-
-	if(send){
-/*
-		Serial.printf("sending buffer with %i bytes : %i %i ", temp.length + 2, temp.frameType, temp.sequenceNumber);
-		for(uint8_t i = 0; i < temp.length; ++i){
-			Serial.printf("%i ", temp.data[i]);
-		}
-		Serial.println();
-*/
-		ble_sendFrame(&temp, temp.length);
-	}
+//	ar_bufferState(&sendQueue, "processed, send");
 }
 
 
 void ar_unpackFrame(uint8_t* data, size_t length){
-//	Serial.printf("unpack frame %i : ", *data);
+	Serial.printf("unpack frame %i : ", *data);
 	length--;
 	switch (*(data++)){
 		case PROJECT_COMMON:
@@ -150,10 +180,14 @@ void ar_unpackFrame(uint8_t* data, size_t length){
 //			Serial.printf("frame error\n");
 			break;
 	}
+	receiveQueue.run = receiveQueue.run->next;
+	receiveQueue.room++;
+
+//	ar_bufferState(&receiveQueue, "processed, receive");
 }
 
 void ar_unpackFrameCommon(uint8_t* data, size_t length){
-//	Serial.printf("class : %i ", *data);
+	Serial.printf("class : %i ", *data);
 	length--;
 	switch(*(data++)){
 		case CMN_COMMON_STATE:
@@ -172,7 +206,7 @@ void ar_unpackFrameCommon(uint8_t* data, size_t length){
 }
 
 void ar_unpackFrameMinidrone(uint8_t* data, size_t length){
-//	Serial.printf("class : %i ", *data);
+	Serial.printf("class : %i ", *data);
 	length--;
 	switch(*(data++)){
 		case MD_PILOTING_STATE:
@@ -187,14 +221,16 @@ void ar_unpackFrameMinidrone(uint8_t* data, size_t length){
 }
 
 void ar_processCommonCommonState(uint8_t* data, size_t length){
-	length--;
-	switch(*(data++)){
+	length -= 2;
+	int16_t command = tools_bufferToUint16t(data, true);
+	data += 2;
+	switch(command){
 		case 1:
 			minidroneState.battery = *data;
 			Serial.printf("battery : %i\n", minidroneState.battery);
 			break;
 		case 7:
-			minidroneState.rssi = (*(++data) << 8) + *data;
+			minidroneState.rssi = tools_bufferToInt16t(data);
 			Serial.printf("RSSI : %i\n", minidroneState.rssi);
 			break;
 		case 16:
@@ -207,8 +243,10 @@ void ar_processCommonCommonState(uint8_t* data, size_t length){
 }
 
 void ar_processCommonHeadlightsState(uint8_t* data, size_t length){
-	length--;
-	switch(*(data++)){
+	length -= 2;
+	int16_t command = tools_bufferToUint16t(data, true);
+	data += 2;
+	switch(command){
 		case 0:
 			minidroneState.headlightLeft = *(++data);
 			minidroneState.headlightRight = *data;
@@ -219,14 +257,16 @@ void ar_processCommonHeadlightsState(uint8_t* data, size_t length){
 }
 
 void ar_processMinidronePilotingState(uint8_t* data, size_t length){
-	length--;
-	switch(*(++data)){
+	length -= 2;
+	int16_t command = tools_bufferToUint16t(data, true);
+	data += 2;
+	switch(command){
 		case 1:
-			minidroneState.flyingState = *data;
+			minidroneState.flyingState = (arFlyingState_t)tools_bufferToInt32t(data);
 			Serial.printf("flying state : %i\n", minidroneState.flyingState);
 			break;
 		case 6:
-			minidroneState.pilotingMode = *data;
+			minidroneState.pilotingMode = tools_bufferToInt32t(data);
 			Serial.printf("piloting mode : %i\n", minidroneState.pilotingMode);
 			break;
 		default:
@@ -236,7 +276,10 @@ void ar_processMinidronePilotingState(uint8_t* data, size_t length){
 
 void ar_processUnused(uint8_t* data, size_t length){
 //	Serial.printf("data length : %i\n", length);
-	Serial.printf("unused data : ");
+	uint16_t command = tools_bufferToUint16t(data, true);
+	data += 2;
+	length -= 2;
+	Serial.printf("command : %i, unused data : ", command);
 
 	for(size_t i = 0; i < length; ++i){
 		Serial.printf("%i ", data[i]);
@@ -247,33 +290,76 @@ void ar_processUnused(uint8_t* data, size_t length){
 
 // 0/2/0
 // common/settings/allSettings
-void ar_sendAskForSettings(){
-	uint8_t toSend[] = {0, 2, 0, 0};
-	ar_populateSendBuffer(FRAME_TYPE_DATA_WITH_ACK, toSend, 4);
+void ar_sendAllSettings(){
+	const uint8_t length = 4;
+	uint8_t toSend[length];
+	toSend[0] = PROJECT_COMMON;
+	toSend[1] = CMN_SETTINGS;
+	tools_uint16tToBuffer(0, &toSend[2]);
+
+	ar_populateSendBuffer(FRAME_TYPE_DATA_WITH_ACK, toSend, length);
 }
 
 // 2/0/0
-// minidrone/piloting/flatrim
-void ar_sendFlatrim(){
+// minidrone/piloting/flattrim
+void ar_sendFlatTrim(){
 
 }
 
 // 2/0/1
 // minidrone/piloting/takeOff
 void ar_sendTakeOff(){
+	if(minidroneState.flyingState != FLYING_STATE_LANDED){
+		return;
+	}
 
+	const uint8_t length = 4;
+	uint8_t toSend[length];
+	toSend[0] = PROJECT_MINIDRONE;
+	toSend[1] = MD_PILOTING;
+	tools_uint16tToBuffer(1, &toSend[2]);
+
+
+	ar_populateSendBuffer(FRAME_TYPE_DATA_WITH_ACK, toSend, length);
 }
 
 // 2/0/2	(non ack)
 // minidrone/piloting/PCMD
-void ar_sendPCMD(int8_t roll, int8_t pitch, int8_t yaw, int8_t gaz, bool rollPitchFlag = 1){
+void ar_sendPCMD(int8_t roll, int8_t pitch, int8_t yaw, int8_t gaz, bool rollPitchFlag){
+	if(minidroneState.flyingState != FLYING_STATE_FLYING){
+		return;
+	}
 
+	const uint8_t length = 13;
+	uint8_t toSend[length];
+	memset(toSend, 0, length);
+	toSend[0] = PROJECT_MINIDRONE;
+	toSend[1] = MD_PILOTING;
+	tools_uint16tToBuffer(2, &toSend[2]);
+	toSend[4] = rollPitchFlag;
+	toSend[5] = roll;
+	toSend[6] = pitch;
+	toSend[7] = yaw;
+	toSend[8] = gaz;
+	// last four bytes are a timestamp. We will see if really needed.
+	ar_populateSendBuffer(FRAME_TYPE_DATA, toSend, length);
 }
 
 // 2/0/3
 // minidrone/piloting/landing
 void ar_sendLanding(){
+	if(minidroneState.flyingState != FLYING_STATE_FLYING){
+		return;
+	}
 
+	const uint8_t length = 4;
+	uint8_t toSend[length];
+	toSend[0] = PROJECT_MINIDRONE;
+	toSend[1] = MD_PILOTING;
+	tools_uint16tToBuffer(3, &toSend[2]);
+
+
+	ar_populateSendBuffer(FRAME_TYPE_DATA_WITH_ACK, toSend, length);
 }
 
 // 2/0/4	(low latency)

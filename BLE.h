@@ -22,4 +22,6 @@ void ble_sendFrame(arBuffer_t* data, uint8_t length);
 
 void ble_enumerateServices();
 
+void ble_askForSettings();
+
 #endif

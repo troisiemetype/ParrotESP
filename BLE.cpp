@@ -24,8 +24,6 @@ static BLEUUID ARSendCommandAckUUID("9a66fa0b-0800-9191-11e4-012d1540cb8e");		//
 static BLEUUID ARSendLowLatencyUUID("9a66fa0c-0800-9191-11e4-012d1540cb8e");		// Send low latency (with ack) (send before other commands)
 static BLEUUID ARSendAckUUID("9a66fa1e-0800-9191-11e4-012d1540cb8e");				// Send ack for received command
 
-//static BLEUUID ARSendAckUUID_("9a66fb1e-0800-9191-11e4-012d1540cb8e");				// Send ack for received command
-
 static BLEUUID ARReceivingUUID("9a66fb00-0800-9191-11e4-012d1540cb8e");				// receive service
 
 static BLEUUID ARReceiveCommandUUID("9a66fb0f-0800-9191-11e4-012d1540cb8e");		// Receive command without ack
@@ -34,7 +32,7 @@ static BLEUUID ARReceiveAckCommandUUID("9a66fb1b-0800-9191-11e4-012d1540cb8e");	
 static BLEUUID ARReceiveAckLowLatencyUUID("9a66fb1c-0800-9191-11e4-012d1540cb8e");	// ack for sent low latency
 
 void ble_onReceiveCommand(BLERemoteCharacteristic* pBLERemoteCharacteristic, uint8_t* data, size_t length, bool isNotify){
-/*
+
 	Serial.printf("Received %s", pBLERemoteCharacteristic->getUUID().toString().c_str());
 	Serial.print(" of data length ");
 	Serial.println(length);
@@ -43,12 +41,12 @@ void ble_onReceiveCommand(BLERemoteCharacteristic* pBLERemoteCharacteristic, uin
 		Serial.printf("%i ", data[i]);
 	}
 	Serial.println();
-*/
+
 	ar_populateReceiveBuffer(FRAME_TYPE_DATA, data, length);
 }
 
 void ble_onReceiveCommandAck(BLERemoteCharacteristic* pBLERemoteCharacteristic, uint8_t* data, size_t length, bool isNotify){
-/*
+
 	Serial.printf("Received with ack %s", pBLERemoteCharacteristic->getUUID().toString().c_str());
 	Serial.print(" of data length ");
 	Serial.println(length);
@@ -57,19 +55,19 @@ void ble_onReceiveCommandAck(BLERemoteCharacteristic* pBLERemoteCharacteristic, 
 		Serial.printf("%i ", data[i]);
 	}
 	Serial.println();
-*/
+
 	// Send ack
 	// Note : calling BLECharacteristic.writeValue() from inside a callback function causes a freeze because of internal semaphores ; use flags !
 	ar_populateReceiveBuffer(FRAME_TYPE_DATA_WITH_ACK, data, length);
 }
 
 void ble_onReceiveAckCommand(BLERemoteCharacteristic* pBLERemoteCharacteristic, uint8_t* data, size_t length, bool isNotify){
-//	Serial.printf("Received Ack for command id : %i\n", data[1]);
+	Serial.printf("Received Ack for command id : %i\n", data[2]);
 	ar_populateReceiveBuffer(FRAME_TYPE_ACK, data, length);
 }
 
 void ble_onReceiveAckLowLatency(BLERemoteCharacteristic* pBLERemoteCharacteristic, uint8_t* data, size_t length, bool isNotify){
-//	Serial.printf("Received Ack for Low Latency id : %i\n", data[1]);
+	Serial.printf("Received Ack for Low Latency id : %i\n", data[2]);
 	ar_populateReceiveBuffer(FRAME_TYPE_ACK, data, length);
 }
 
@@ -137,48 +135,48 @@ void ble_connect(){
 	// Set send service
 	BLERemoteService *sendService = pClient->getService(ARSendingUUID);
 	if(sendService == NULL){
-//		Serial.printf("failed to create service %s\n", ARSendingUUID.toString().c_str());
+		log_i("failed to create service %s\n", ARSendingUUID.toString().c_str());
 		return;		
 	} else {
-//		Serial.printf("created service %s\n", ARSendingUUID.toString().c_str());		
+		log_i("created service %s\n", ARSendingUUID.toString().c_str());		
 	}
 
-	Serial.println();
+//	Serial.println();
 
 	// Set non-ack send command
 	charSendCommand = sendService->getCharacteristic(ARSendCommandUUID);
 	if(charSendCommand == NULL){
-//		Serial.printf("failed to find characteristic %s\n", ARSendCommandUUID.toString().c_str());
+		log_i("failed to find characteristic %s\n", ARSendCommandUUID.toString().c_str());
 		return;
 	} else {
-//		Serial.printf("found characteristic %s\n", ARSendCommandUUID.toString().c_str());		
+		log_i("found characteristic %s\n", ARSendCommandUUID.toString().c_str());		
 	}
 
 	// Set ack send command
 	charSendCommandAck = sendService->getCharacteristic(ARSendCommandAckUUID);
 	if(charSendCommandAck == NULL){
-//		Serial.printf("failed to find characteristic %s\n", ARSendCommandAckUUID.toString().c_str());
+		log_i("failed to find characteristic %s\n", ARSendCommandAckUUID.toString().c_str());
 		return;
 	} else {
-//		Serial.printf("found characteristic %s\n", ARSendCommandAckUUID.toString().c_str());		
+		log_i("found characteristic %s\n", ARSendCommandAckUUID.toString().c_str());		
 	}
 
 	// Set low-latency send command
 	charSendLowLatency = sendService->getCharacteristic(ARSendLowLatencyUUID);
 	if(charSendLowLatency == NULL){
-//		Serial.printf("failed to find characteristic %s\n", ARSendLowLatencyUUID.toString().c_str());
+		log_i("failed to find characteristic %s\n", ARSendLowLatencyUUID.toString().c_str());
 		return;
 	} else {
-//		Serial.printf("found characteristic %s\n", ARSendLowLatencyUUID.toString().c_str());		
+		log_i("found characteristic %s\n", ARSendLowLatencyUUID.toString().c_str());		
 	}
 
 	// Set ack command
 	charSendAck = sendService->getCharacteristic(ARSendAckUUID);
 	if(charSendAck == NULL){
-//		Serial.printf("failed to find characteristic %s\n", ARSendAckUUID.toString().c_str());
+		log_i("failed to find characteristic %s\n", ARSendAckUUID.toString().c_str());
 		return;
 	} else {
-//		Serial.printf("found characteristic %s\n", ARSendAckUUID.toString().c_str());		
+		log_i("found characteristic %s\n", ARSendAckUUID.toString().c_str());		
 	}
 
 	Serial.println();
@@ -187,10 +185,10 @@ void ble_connect(){
 	BLERemoteService *receiveService = pClient->getService(ARReceivingUUID);
 
 	if(receiveService == NULL){
-//		Serial.printf("failed to create service %s\n", ARReceivingUUID.toString().c_str());
+		log_i("failed to create service %s\n", ARReceivingUUID.toString().c_str());
 		return;
 	} else {
-//		Serial.printf("created service %s\n", ARReceivingUUID.toString().c_str());
+		log_i("created service %s\n", ARReceivingUUID.toString().c_str());
 	}
 
 	Serial.println();
@@ -198,57 +196,57 @@ void ble_connect(){
 	// Set non-ack receive commands (like battery, etc.)
 	charReceiveCommand = receiveService->getCharacteristic(ARReceiveCommandUUID);
 	if(charReceiveCommand == NULL){
-//		Serial.printf("failed to find characteristic %s\n", ARReceiveCommandUUID.toString().c_str());
+		log_i("failed to find characteristic %s\n", ARReceiveCommandUUID.toString().c_str());
 		return;
 	} else {
-//		Serial.printf("found characteristic %s\n", ARReceiveCommandUUID.toString().c_str());		
+		log_i("found characteristic %s\n", ARReceiveCommandUUID.toString().c_str());		
 	}
 
 	if(charReceiveCommand->canNotify()){
 		charReceiveCommand->registerForNotify(ble_onReceiveCommand);
-//		Serial.printf("callback registered for receive commands\n");
+		log_i("callback registered for receive commands\n");
 	}
 
 	// Set ack receive commands
 	charReceiveCommandAck = receiveService->getCharacteristic(ARReceiveCommandAckUUID);
 	if(charReceiveCommandAck == NULL){
-//		Serial.printf("failed to find characteristic %s\n", ARReceiveCommandAckUUID.toString().c_str());
+		log_i("failed to find characteristic %s\n", ARReceiveCommandAckUUID.toString().c_str());
 		return;
 	} else {
-//		Serial.printf("found characteristic %s\n", ARReceiveCommandAckUUID.toString().c_str());		
+		log_i("found characteristic %s\n", ARReceiveCommandAckUUID.toString().c_str());		
 	}
 
 	if(charReceiveCommandAck->canNotify()){
 		charReceiveCommandAck->registerForNotify(ble_onReceiveCommandAck);
-//		Serial.printf("callback registered for receive commands with ack\n");
+		log_i("callback registered for receive commands with ack\n");
 	}
 
 	// Set receive ack from commands
 	charReceiveAckCommand = receiveService->getCharacteristic(ARReceiveAckCommandUUID);
 	if(charReceiveAckCommand == NULL){
-//		Serial.printf("failed to find characteristic %s\n", ARReceiveAckCommandUUID.toString().c_str());
+		log_i("failed to find characteristic %s\n", ARReceiveAckCommandUUID.toString().c_str());
 		return;
 	} else {
-//		Serial.printf("found characteristic %s\n", ARReceiveAckCommandUUID.toString().c_str());		
+		log_i("found characteristic %s\n", ARReceiveAckCommandUUID.toString().c_str());		
 	}
 
 	if(charReceiveAckCommand->canNotify()){
 		charReceiveAckCommand->registerForNotify(ble_onReceiveAckCommand);
-//		Serial.printf("callback registered for acks from commands\n");
+		log_i("callback registered for acks from commands\n");
 	}
 
 	// Set receive ack from low latency
 	charReceiveAckLowLatency = receiveService->getCharacteristic(ARReceiveAckLowLatencyUUID);
 	if(charReceiveAckLowLatency == NULL){
-//		Serial.printf("failed to find characteristic %s\n", ARReceiveAckLowLatencyUUID.toString().c_str());
+		log_i("failed to find characteristic %s\n", ARReceiveAckLowLatencyUUID.toString().c_str());
 		return;
 	} else {
-//		Serial.printf("found characteristic %s\n", ARReceiveAckLowLatencyUUID.toString().c_str());		
+		log_i("found characteristic %s\n", ARReceiveAckLowLatencyUUID.toString().c_str());		
 	}
 
 	if(charReceiveAckLowLatency->canNotify()){
 		charReceiveAckLowLatency->registerForNotify(ble_onReceiveAckLowLatency);
-//		Serial.printf("callback registered for acks from low latency\n");
+		log_i("callback registered for acks from low latency\n");
 	}
 
 	Serial.println();
@@ -323,3 +321,7 @@ void ble_enumerateServices(){
 	Serial.println("end of services");
 }
 
+void ble_askForSettings(){
+	uint8_t toSend[] = {4, 0, 0, 2, 0, 0};
+	charSendCommandAck->writeValue(toSend, 6);
+}

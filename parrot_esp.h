@@ -4,9 +4,13 @@
 #include <Arduino.h>
 #include "CircularBuffer.h"
 
+#include "settings.h"
 #include "commons.h"
+#include "tools.h"
 
 #include "BLE.h"
 #include "AR.h"
+
+#include "controls.h"
 
 #endif
