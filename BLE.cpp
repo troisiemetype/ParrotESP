@@ -3,33 +3,55 @@
 BLEScan *pBLEScan;
 BLEClient *pClient;
 
-BLERemoteCharacteristic *charSendCommand;
-BLERemoteCharacteristic *charSendCommandAck;
-BLERemoteCharacteristic *charSendLowLatency;
-BLERemoteCharacteristic *charSendAck;
+BLERemoteCharacteristic *chrSendCommand;
+BLERemoteCharacteristic *chrSendCommandAck;
+BLERemoteCharacteristic *chrSendLowLatency;
+BLERemoteCharacteristic *chrSendAck;
 
-BLERemoteCharacteristic *charReceiveCommand;
-BLERemoteCharacteristic *charReceiveCommandAck;
-BLERemoteCharacteristic *charReceiveAckCommand;
-BLERemoteCharacteristic *charReceiveAckLowLatency;
+BLERemoteCharacteristic *chrReceiveCommand;
+BLERemoteCharacteristic *chrReceiveCommandAck;
+BLERemoteCharacteristic *chrReceiveAckCommand;
+BLERemoteCharacteristic *chrReceiveAckLowLatency;
+
+BLERemoteCharacteristic *chrNormalFTPTransferring;
+BLERemoteCharacteristic *chrNormalFTPGetting;
+BLERemoteCharacteristic *chrNormalFTPHandling;
+
+BLERemoteCharacteristic *chrUpdateFTPTransferring;
+BLERemoteCharacteristic *chrUpdateFTPGetting;
+BLERemoteCharacteristic *chrUpdateFTPHandling;
 
 BLEAdvertisedDevice *rollingSpider;
 uint8_t scanTime = 5;
 bool connect = false;
 
-static BLEUUID ARSendingUUID("9a66fa00-0800-9191-11e4-012d1540cb8e");				// Send service
+static BLEUUID ARCOMMAND_SENDING_SERVICE_UUID("9a66fa00-0800-9191-11e4-012d1540cb8e");				// Send service
 
-static BLEUUID ARSendCommandUUID("9a66fa0a-0800-9191-11e4-012d1540cb8e");			// Send command without ack
-static BLEUUID ARSendCommandAckUUID("9a66fa0b-0800-9191-11e4-012d1540cb8e");		// Send command with ack
-static BLEUUID ARSendLowLatencyUUID("9a66fa0c-0800-9191-11e4-012d1540cb8e");		// Send low latency (with ack) (send before other commands)
-static BLEUUID ARSendAckUUID("9a66fa1e-0800-9191-11e4-012d1540cb8e");				// Send ack for received command
+static BLEUUID SEND_DATA_UUID("9a66fa0a-0800-9191-11e4-012d1540cb8e");			// Send command without ack
+static BLEUUID SEND_DATA_WITH_ACK_UUID("9a66fa0b-0800-9191-11e4-012d1540cb8e");		// Send command with ack
+static BLEUUID SEND_HIGH_PRIORITY_UUID("9a66fa0c-0800-9191-11e4-012d1540cb8e");		// Send low latency (with ack) (send before other commands)
+static BLEUUID SEND_ACK_UUID("9a66fa1e-0800-9191-11e4-012d1540cb8e");				// Send ack for received command
 
-static BLEUUID ARReceivingUUID("9a66fb00-0800-9191-11e4-012d1540cb8e");				// receive service
+static BLEUUID ARCOMMAND_RECEIVING_SERVICE_UUID("9a66fb00-0800-9191-11e4-012d1540cb8e");				// receive service
 
-static BLEUUID ARReceiveCommandUUID("9a66fb0f-0800-9191-11e4-012d1540cb8e");		// Receive command without ack
-static BLEUUID ARReceiveCommandAckUUID("9a66fb0e-0800-9191-11e4-012d1540cb8e");		// Receive command with ack
-static BLEUUID ARReceiveAckCommandUUID("9a66fb1b-0800-9191-11e4-012d1540cb8e");		// ack for sent command
-static BLEUUID ARReceiveAckLowLatencyUUID("9a66fb1c-0800-9191-11e4-012d1540cb8e");	// ack for sent low latency
+static BLEUUID RECEIVE_DATA_UUID("9a66fb0f-0800-9191-11e4-012d1540cb8e");		// Receive command without ack
+static BLEUUID RECEIVE_DATA_WITH_ACK_UUID("9a66fb0e-0800-9191-11e4-012d1540cb8e");		// Receive command with ack
+static BLEUUID RECEIVE_ACK_DATA_UUID("9a66fb1b-0800-9191-11e4-012d1540cb8e");		// ack for sent command
+static BLEUUID RECEIVE_ACK_HIGH_PRIORITY_UUID("9a66fb1c-0800-9191-11e4-012d1540cb8e");	// ack for sent low latency
+
+static BLEUUID NORMAL_BLE_FTP_SERVICE_UUID("9a66fd21-0800-9191-11e4-012d1540cb8e");
+
+static BLEUUID NORMAL_FTP_TRANSFERRING_UUID("9a66fd22-0800-9191-11e4-012d1540cb8e");
+static BLEUUID NORMAL_FTP_GETTING_UUID("9a66fd23-0800-9191-11e4-012d1540cb8e");
+static BLEUUID NORMAL_FTP_HANDLING_UUID("9a66fd24-0800-9191-11e4-012d1540cb8e");
+
+static BLEUUID UPDATE_BLE_FTP_UUID("9a66fd51-0800-9191-11e4-012d1540cb8e");
+
+static BLEUUID UPDATE_FTP_TRANSFERRING_UUID("9a66fd52-0800-9191-11e4-012d1540cb8e");
+static BLEUUID UPDATE_FTP_GETTING_UUID("9a66fd53-0800-9191-11e4-012d1540cb8e");
+static BLEUUID UPDATE_FTP_HANDLING_UUID("9a66fd54-0800-9191-11e4-012d1540cb8e");
+
+
 
 void ble_onReceiveCommand(BLERemoteCharacteristic* pBLERemoteCharacteristic, uint8_t* data, size_t length, bool isNotify){
 
@@ -132,124 +154,226 @@ void ble_connect(){
 
 	Serial.printf("connected to %s\n\n", pClient->getPeerAddress().toString().c_str());
 
+	ble_setSendCharacteristics();
+	ble_setReceiveCharacteristics();
+	ble_setHandshakeCharacteristics();
+
+	ble_shakeHands();
+}
+
+void ble_shakeHands(){
+	uint8_t toSend[] = {0, 1, 0, 0};
+
+	chrReceiveCommand->writeValue(toSend, 4);
+	chrReceiveCommandAck->writeValue(toSend, 4);
+	chrReceiveAckCommand->writeValue(toSend, 4);
+	chrReceiveAckLowLatency->writeValue(toSend, 4);
+	
+	chrNormalFTPTransferring->writeValue(toSend, 4);
+	chrNormalFTPGetting->writeValue(toSend, 4);
+	chrNormalFTPHandling->writeValue(toSend, 4);
+
+	chrUpdateFTPTransferring->writeValue(toSend, 4);
+	chrUpdateFTPGetting->writeValue(toSend, 4);
+	chrUpdateFTPHandling->writeValue(toSend, 4);
+}
+
+void ble_setSendCharacteristics(){
 	// Set send service
-	BLERemoteService *sendService = pClient->getService(ARSendingUUID);
+	BLERemoteService *sendService = pClient->getService(ARCOMMAND_SENDING_SERVICE_UUID);
 	if(sendService == NULL){
-		log_i("failed to create service %s\n", ARSendingUUID.toString().c_str());
+		log_i("failed to create service %s\n", ARCOMMAND_SENDING_SERVICE_UUID.toString().c_str());
 		return;		
 	} else {
-		log_i("created service %s\n", ARSendingUUID.toString().c_str());		
+		log_i("created service %s\n", ARCOMMAND_SENDING_SERVICE_UUID.toString().c_str());		
 	}
 
 //	Serial.println();
 
 	// Set non-ack send command
-	charSendCommand = sendService->getCharacteristic(ARSendCommandUUID);
-	if(charSendCommand == NULL){
-		log_i("failed to find characteristic %s\n", ARSendCommandUUID.toString().c_str());
+	chrSendCommand = sendService->getCharacteristic(SEND_DATA_UUID);
+	if(chrSendCommand == NULL){
+		log_i("failed to find characteristic %s\n", SEND_DATA_UUID.toString().c_str());
 		return;
 	} else {
-		log_i("found characteristic %s\n", ARSendCommandUUID.toString().c_str());		
+		log_i("found characteristic %s\n", SEND_DATA_UUID.toString().c_str());		
 	}
 
 	// Set ack send command
-	charSendCommandAck = sendService->getCharacteristic(ARSendCommandAckUUID);
-	if(charSendCommandAck == NULL){
-		log_i("failed to find characteristic %s\n", ARSendCommandAckUUID.toString().c_str());
+	chrSendCommandAck = sendService->getCharacteristic(SEND_DATA_WITH_ACK_UUID);
+	if(chrSendCommandAck == NULL){
+		log_i("failed to find characteristic %s\n", SEND_DATA_WITH_ACK_UUID.toString().c_str());
 		return;
 	} else {
-		log_i("found characteristic %s\n", ARSendCommandAckUUID.toString().c_str());		
+		log_i("found characteristic %s\n", SEND_DATA_WITH_ACK_UUID.toString().c_str());		
 	}
 
 	// Set low-latency send command
-	charSendLowLatency = sendService->getCharacteristic(ARSendLowLatencyUUID);
-	if(charSendLowLatency == NULL){
-		log_i("failed to find characteristic %s\n", ARSendLowLatencyUUID.toString().c_str());
+	chrSendLowLatency = sendService->getCharacteristic(SEND_HIGH_PRIORITY_UUID);
+	if(chrSendLowLatency == NULL){
+		log_i("failed to find characteristic %s\n", SEND_HIGH_PRIORITY_UUID.toString().c_str());
 		return;
 	} else {
-		log_i("found characteristic %s\n", ARSendLowLatencyUUID.toString().c_str());		
+		log_i("found characteristic %s\n", SEND_HIGH_PRIORITY_UUID.toString().c_str());		
 	}
 
 	// Set ack command
-	charSendAck = sendService->getCharacteristic(ARSendAckUUID);
-	if(charSendAck == NULL){
-		log_i("failed to find characteristic %s\n", ARSendAckUUID.toString().c_str());
+	chrSendAck = sendService->getCharacteristic(SEND_ACK_UUID);
+	if(chrSendAck == NULL){
+		log_i("failed to find characteristic %s\n", SEND_ACK_UUID.toString().c_str());
 		return;
 	} else {
-		log_i("found characteristic %s\n", ARSendAckUUID.toString().c_str());		
+		log_i("found characteristic %s\n", SEND_ACK_UUID.toString().c_str());		
 	}
 
 	Serial.println();
 
-	// Set receive service
-	BLERemoteService *receiveService = pClient->getService(ARReceivingUUID);
+
+}
+
+void ble_setReceiveCharacteristics(){
+		// Set receive service
+	BLERemoteService *receiveService = pClient->getService(ARCOMMAND_RECEIVING_SERVICE_UUID);
 
 	if(receiveService == NULL){
-		log_i("failed to create service %s\n", ARReceivingUUID.toString().c_str());
+		log_i("failed to create service %s\n", ARCOMMAND_RECEIVING_SERVICE_UUID.toString().c_str());
 		return;
 	} else {
-		log_i("created service %s\n", ARReceivingUUID.toString().c_str());
+		log_i("created service %s\n", ARCOMMAND_RECEIVING_SERVICE_UUID.toString().c_str());
 	}
 
 	Serial.println();
 
 	// Set non-ack receive commands (like battery, etc.)
-	charReceiveCommand = receiveService->getCharacteristic(ARReceiveCommandUUID);
-	if(charReceiveCommand == NULL){
-		log_i("failed to find characteristic %s\n", ARReceiveCommandUUID.toString().c_str());
+	chrReceiveCommand = receiveService->getCharacteristic(RECEIVE_DATA_UUID);
+	if(chrReceiveCommand == NULL){
+		log_i("failed to find characteristic %s\n", RECEIVE_DATA_UUID.toString().c_str());
 		return;
 	} else {
-		log_i("found characteristic %s\n", ARReceiveCommandUUID.toString().c_str());		
+		log_i("found characteristic %s\n", RECEIVE_DATA_UUID.toString().c_str());		
 	}
 
-	if(charReceiveCommand->canNotify()){
-		charReceiveCommand->registerForNotify(ble_onReceiveCommand);
+	if(chrReceiveCommand->canNotify()){
+		chrReceiveCommand->registerForNotify(ble_onReceiveCommand);
 		log_i("callback registered for receive commands\n");
 	}
 
 	// Set ack receive commands
-	charReceiveCommandAck = receiveService->getCharacteristic(ARReceiveCommandAckUUID);
-	if(charReceiveCommandAck == NULL){
-		log_i("failed to find characteristic %s\n", ARReceiveCommandAckUUID.toString().c_str());
+	chrReceiveCommandAck = receiveService->getCharacteristic(RECEIVE_DATA_WITH_ACK_UUID);
+	if(chrReceiveCommandAck == NULL){
+		log_i("failed to find characteristic %s\n", RECEIVE_DATA_WITH_ACK_UUID.toString().c_str());
 		return;
 	} else {
-		log_i("found characteristic %s\n", ARReceiveCommandAckUUID.toString().c_str());		
+		log_i("found characteristic %s\n", RECEIVE_DATA_WITH_ACK_UUID.toString().c_str());		
 	}
 
-	if(charReceiveCommandAck->canNotify()){
-		charReceiveCommandAck->registerForNotify(ble_onReceiveCommandAck);
+	if(chrReceiveCommandAck->canNotify()){
+		chrReceiveCommandAck->registerForNotify(ble_onReceiveCommandAck);
 		log_i("callback registered for receive commands with ack\n");
 	}
 
 	// Set receive ack from commands
-	charReceiveAckCommand = receiveService->getCharacteristic(ARReceiveAckCommandUUID);
-	if(charReceiveAckCommand == NULL){
-		log_i("failed to find characteristic %s\n", ARReceiveAckCommandUUID.toString().c_str());
+	chrReceiveAckCommand = receiveService->getCharacteristic(RECEIVE_ACK_DATA_UUID);
+	if(chrReceiveAckCommand == NULL){
+		log_i("failed to find characteristic %s\n", RECEIVE_ACK_DATA_UUID.toString().c_str());
 		return;
 	} else {
-		log_i("found characteristic %s\n", ARReceiveAckCommandUUID.toString().c_str());		
+		log_i("found characteristic %s\n", RECEIVE_ACK_DATA_UUID.toString().c_str());		
 	}
 
-	if(charReceiveAckCommand->canNotify()){
-		charReceiveAckCommand->registerForNotify(ble_onReceiveAckCommand);
+	if(chrReceiveAckCommand->canNotify()){
+		chrReceiveAckCommand->registerForNotify(ble_onReceiveAckCommand);
 		log_i("callback registered for acks from commands\n");
 	}
 
 	// Set receive ack from low latency
-	charReceiveAckLowLatency = receiveService->getCharacteristic(ARReceiveAckLowLatencyUUID);
-	if(charReceiveAckLowLatency == NULL){
-		log_i("failed to find characteristic %s\n", ARReceiveAckLowLatencyUUID.toString().c_str());
+	chrReceiveAckLowLatency = receiveService->getCharacteristic(RECEIVE_ACK_HIGH_PRIORITY_UUID);
+	if(chrReceiveAckLowLatency == NULL){
+		log_i("failed to find characteristic %s\n", RECEIVE_ACK_HIGH_PRIORITY_UUID.toString().c_str());
 		return;
 	} else {
-		log_i("found characteristic %s\n", ARReceiveAckLowLatencyUUID.toString().c_str());		
+		log_i("found characteristic %s\n", RECEIVE_ACK_HIGH_PRIORITY_UUID.toString().c_str());		
 	}
 
-	if(charReceiveAckLowLatency->canNotify()){
-		charReceiveAckLowLatency->registerForNotify(ble_onReceiveAckLowLatency);
+	if(chrReceiveAckLowLatency->canNotify()){
+		chrReceiveAckLowLatency->registerForNotify(ble_onReceiveAckLowLatency);
 		log_i("callback registered for acks from low latency\n");
 	}
 
 	Serial.println();
+}
+
+void ble_setHandshakeCharacteristics(){
+	// Set handshake services
+	BLERemoteService *sendService = pClient->getService(NORMAL_BLE_FTP_SERVICE_UUID);
+	if(sendService == NULL){
+		log_i("failed to create service %s\n", NORMAL_BLE_FTP_SERVICE_UUID.toString().c_str());
+		return;		
+	} else {
+		log_i("created service %s\n", NORMAL_BLE_FTP_SERVICE_UUID.toString().c_str());		
+	}
+
+//	Serial.println();
+
+	chrNormalFTPTransferring = sendService->getCharacteristic(NORMAL_FTP_TRANSFERRING_UUID);
+	if(chrNormalFTPTransferring == NULL){
+		log_i("failed to find characteristic %s\n", NORMAL_FTP_TRANSFERRING_UUID.toString().c_str());
+		return;
+	} else {
+		log_i("found characteristic %s\n", NORMAL_FTP_TRANSFERRING_UUID.toString().c_str());		
+	}
+
+	chrNormalFTPGetting = sendService->getCharacteristic(NORMAL_FTP_GETTING_UUID);
+	if(chrNormalFTPGetting == NULL){
+		log_i("failed to find characteristic %s\n", NORMAL_FTP_GETTING_UUID.toString().c_str());
+		return;
+	} else {
+		log_i("found characteristic %s\n", NORMAL_FTP_GETTING_UUID.toString().c_str());		
+	}
+
+	chrNormalFTPHandling = sendService->getCharacteristic(NORMAL_FTP_HANDLING_UUID);
+	if(chrNormalFTPHandling == NULL){
+		log_i("failed to find characteristic %s\n", NORMAL_FTP_HANDLING_UUID.toString().c_str());
+		return;
+	} else {
+		log_i("found characteristic %s\n", NORMAL_FTP_HANDLING_UUID.toString().c_str());		
+	}
+
+	sendService = pClient->getService(UPDATE_BLE_FTP_UUID);
+	if(sendService == NULL){
+		log_i("failed to create service %s\n", UPDATE_BLE_FTP_UUID.toString().c_str());
+		return;		
+	} else {
+		log_i("created service %s\n", UPDATE_BLE_FTP_UUID.toString().c_str());		
+	}
+
+//	Serial.println();
+
+	chrUpdateFTPTransferring = sendService->getCharacteristic(UPDATE_FTP_TRANSFERRING_UUID);
+	if(chrUpdateFTPTransferring == NULL){
+		log_i("failed to find characteristic %s\n", UPDATE_FTP_TRANSFERRING_UUID.toString().c_str());
+		return;
+	} else {
+		log_i("found characteristic %s\n", UPDATE_FTP_TRANSFERRING_UUID.toString().c_str());		
+	}
+
+	chrUpdateFTPGetting = sendService->getCharacteristic(UPDATE_FTP_GETTING_UUID);
+	if(chrUpdateFTPGetting == NULL){
+		log_i("failed to find characteristic %s\n", UPDATE_FTP_GETTING_UUID.toString().c_str());
+		return;
+	} else {
+		log_i("found characteristic %s\n", UPDATE_FTP_GETTING_UUID.toString().c_str());		
+	}
+
+	chrUpdateFTPHandling = sendService->getCharacteristic(UPDATE_FTP_HANDLING_UUID);
+	if(chrUpdateFTPHandling == NULL){
+		log_i("failed to find characteristic %s\n", UPDATE_FTP_HANDLING_UUID.toString().c_str());
+		return;
+	} else {
+		log_i("found characteristic %s\n", UPDATE_FTP_HANDLING_UUID.toString().c_str());		
+	}
+
+
 }
 
 void ble_sendFrame(arBuffer_t* data, uint8_t length){
@@ -258,16 +382,16 @@ void ble_sendFrame(arBuffer_t* data, uint8_t length){
 
 	switch(data->frameType){
 		case FRAME_TYPE_ACK:
-			remote = charSendAck;
+			remote = chrSendAck;
 			break;
 		case FRAME_TYPE_DATA:
-			remote = charSendCommand;
+			remote = chrSendCommand;
 			break;
 		case FRAME_TYPE_LOW_LATENCY:
-			remote = charSendLowLatency;
+			remote = chrSendLowLatency;
 			break;
 		case FRAME_TYPE_DATA_WITH_ACK:
-			remote = charSendCommandAck;
+			remote = chrSendCommandAck;
 			break;
 	}
 
@@ -323,5 +447,5 @@ void ble_enumerateServices(){
 
 void ble_askForSettings(){
 	uint8_t toSend[] = {4, 0, 0, 2, 0, 0};
-	charSendCommandAck->writeValue(toSend, 6);
+	chrSendCommandAck->writeValue(toSend, 6);
 }

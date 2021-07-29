@@ -17,6 +17,12 @@ void ble_init();
 bool ble_scan();
 void ble_connect();
 
+void ble_shakeHands();
+
+void ble_setSendCharacteristics();
+void ble_setReceiveCharacteristics();
+void ble_setHandshakeCharacteristics();
+
 void ble_sendFrame(arBuffer_t* data, uint8_t length);
 //void ble_sendFrame(uint8_t* data, uint8_t length);
 

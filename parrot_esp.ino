@@ -23,16 +23,10 @@ void setup(){
 void loop(){
 	ar_checkSendBuffer();			// todo : there is a problem with this one.
 
-//	control_update();
+	control_update();
 
 	ar_checkReceiveBuffer();
 }
-
-
-
-
-
-
 
 
 

@@ -1,5 +1,25 @@
 #include "AR.h"
 
+/*
+ *	Connexion :
+ *
+ * 	ARSDK protocol mentions the way to communicate with the minidrone.
+ * 	However, it seems that the SDK also handles a handshake between the controller and the device, that is not documented.
+ * 	The characteristics mentionned in ARSDK starting guide are :
+ *		ARcommand sending services		UUID 0xfa00
+ *		ARcommand receiving services 	UUID 0xfb00
+ *	
+ *	Looking at the pyparrot project, it seems that ther are other services needed, which seems to be confirmed by this thread :
+ *		https://forum.developer.parrot.com/t/minimal-ble-commands-to-send-for-take-off/1686/2 (which is also mentionned in the code of pyparrot ! :) )
+ *	
+ *	Those others services are / would be :
+ *		Update BLE FTP 					UUID 0xfd51
+ *		Normal BLE FTP service 			UUID 0xfd21
+ *	(which are indeed enumerated when iterating through all services and characteristics)
+ *	
+ *	Each of these services enumerate 3 characteristics, each of one has to be sent 0x0100 for the handshake to be completed.
+ */
+
 const size_t SEND_BUFFER_SIZE = 32;
 const size_t RECEIVE_BUFFER_SIZE = 32;
 const size_t ACK_BUFFER_SIZE = 16;
