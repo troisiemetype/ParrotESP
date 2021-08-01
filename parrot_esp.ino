@@ -9,23 +9,28 @@ void setup(){
 	ble_init();
 	for(;;){
 		if(ble_scan()) break;
-		delay(1000);
+		delay(100);
 	}
 
 	ble_connect();
 //	ble_enumerateServices();
-	control_init();
 //	ble_askForSettings();
 	ar_sendAllSettings();
+
+	control_init();
 
 }
 
 void loop(){
-	ar_checkSendBuffer();			// todo : there is a problem with this one.
-
+	if(!ble_checkConnection()){
+		ble_connect();
+		return;
+	}
 	control_update();
 
+	ar_checkSendBuffer();
 	ar_checkReceiveBuffer();
+	ar_checkAckBuffer();
 }
 
 

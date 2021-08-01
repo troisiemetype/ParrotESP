@@ -1,0 +1,11 @@
+FrSky X7 external module modes :
+	PPM
+	XJT (bind)
+	DSM2 (bind)
+	CRSF
+	Multi (bind)
+	R9M (bind)
+	R9M access (bind)
+	GHST
+	SBUS
+	AFHDS3 (bind)

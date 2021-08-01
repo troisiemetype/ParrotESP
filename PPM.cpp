@@ -4,7 +4,7 @@ hw_timer_t *ppmTimer = NULL;
 uint16_t rawChannel[NUM_CHANNELS];
 int16_t channel[NUM_CHANNELS];
 uint8_t curChan = 0;
-volatile bool ppmData = 0;
+volatile bool ppmData = false;
 
 portMUX_TYPE ppmMux = portMUX_INITIALIZER_UNLOCKED;
 
@@ -19,16 +19,13 @@ void ppm_init(){
 bool ppm_update(){
 //	Serial.println(timerRead(ppmTimer));
 	if(!ppmData) return false;
-	ppmData = 0;
+	ppmData = false;
 
 	for(uint8_t i = 0; i < NUM_CHANNELS; ++i){
 		portENTER_CRITICAL_ISR(&ppmMux);
 		channel[i] = rawChannel[i] - 1500;
 		portEXIT_CRITICAL_ISR(&ppmMux);
 	}
-
-	return true;
-
 /*
 	Serial.printf("channels :\t");
 	for(uint8_t i = 0; i < NUM_CHANNELS; ++i){
@@ -36,6 +33,7 @@ bool ppm_update(){
 	}
 	Serial.println();
 */
+	return true;
 }
 
 int16_t* ppm_getChannels(){
@@ -47,7 +45,7 @@ void IRAM_ATTR ppm_isr(){
 	timerRestart(ppmTimer);
 	if(time > 3000){
 		curChan = 0;
-		ppmData = 1;
+		ppmData = true;
 	} else {
 		portENTER_CRITICAL_ISR(&ppmMux);
 		rawChannel[curChan] = (uint16_t)time;

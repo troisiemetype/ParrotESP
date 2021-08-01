@@ -16,20 +16,43 @@ enum arFlyingState_t{
 	FLYING_STATE_INIT,
 };
 
+enum arAlertState_t{
+	ALERT_STATE_NONE,
+	ALERT_STATE_USER,
+	ALERT_STATE_CUTOUT,
+	ALERT_STATE_CRITICAL_BATTERY,
+	ALERT_STATE_LOW_BATTERY,
+};
+
+enum arPilotingMode_t{
+	PILOTING_MODE_EASY,
+	PILOTING_MODE_MEDIUM,
+	PILOTING_MODE_DIFFICULT,
+};
+
 struct minidroneState_t{
-	uint8_t battery;									// 0/5/1 		common/commonState/batteryStateChanged
+	uint8_t battery;									// 0/5/1 		common/CommonState/batteryStateChanged
 
-	int16_t rssi;										// 0/5/7		common/commonState/wifiSignalChanged
-	uint8_t linkSignalQuality;							// 0/5/15		common/commonState/linkSignalQuality
+	int16_t rssi;										// 0/5/7		common/CommonState/wifiSignalChanged
+	uint8_t linkSignalQuality;							// 0/5/15		common/CommonState/linkSignalQuality
 
-	uint8_t headlightLeft;								// 0/23/0		common/headlightsState/intensityChanged
+	uint8_t headlightLeft;								// 0/23/0		common/HeadlightsState/intensityChanged
 	uint8_t headlightRight;
 
-	arFlyingState_t flyingState;									// 2/3/1 		minidrone/pilotingState/flyingStateChanged
-	// todo : manage alert from minidrone/pilotingState/Alerts
+	arFlyingState_t flyingState;						// 2/3/1 		minidrone/PilotingState/flyingStateChanged
+	arAlertState_t alertState;							// 2/3/2 		minidrone/PilotingState/AlertStateChanged
+	bool autoTakeOffMode;								// 2/3/3 		minidrone/PilotingState/AutoTakeOffModeChanged
+	arPilotingMode_t pilotingMode;						// 2/3/6 		minidrone/PilotingState/pilotingModeChanged		// See also PreferredPilotingMode
 
-	uint8_t pilotingMode;									// 2/3/6 		minidrone/pilotingState/pilotingModeChanged
-	// todo : prefered piloting mode
+	float maxAltitude; 									// 2/8/0 		minidrone/PilotingSettings/MaxAltitude 		Min : 2m
+	float maxTilt; 										// 2/8/1 		minidrone/PilotingSettings/MaxTilt 			Default : 15°
+	bool bankedTurn;									// 2/8/2 		minidrone/PilotingSettings/BankedTurn
+	float maxThrottle;									// 2/8/3 		minidrone/PilotingSettings/MaxThrottle 		between 0 and 1
+	arPilotingMode_t preferredPilotingMode;				// 2/8/4 		minidrone/PilotingSettings/PreferredPilotingMode
+
+	float maxVerticalSpeed; 							// 2/1/0 		minidrone/SpeedSettings/MaxVerticalSpeed 	Default : 0.7m/s
+	float maxRotationSpeed; 							// 2/1/1 		minidrone/SpeedSettings/MaxRotationSpeed 	Default : 185°/s
+	float maxHorizontalSpeed; 							// 2/1/3 		minidrone/SpeedSettings/MaxHorizontalSpeed  ony used when maxTilt is not used.
 	// todo : use Navigation data state ?				// 2/18/x
 	// piloting settings state
 };
@@ -112,10 +135,14 @@ void ar_bufferState(arBufferQueue_t* queue, char* name, bool displayBuffer = fal
 void ar_bufferContent(arBuffer_t* buffer);
 
 void ar_populateReceiveBuffer(arFrameType_t, uint8_t* data, uint8_t length);
-void ar_populateSendBuffer(arFrameType_t, uint8_t* data, uint8_t length);
+void ar_populateSendBuffer(arFrameType_t, uint8_t* data, uint8_t length, uint8_t retry = 5);
+void ar_populateAckBuffer(arBuffer_t* buffer);
 
 void ar_checkReceiveBuffer();
 void ar_checkSendBuffer();
+void ar_checkAckBuffer();
+
+void ar_processAck(uint8_t sequenceNumber);
 
 void ar_unpackFrame(uint8_t* data, size_t length);
 
@@ -127,6 +154,8 @@ void ar_processCommonCommonState(uint8_t* data, size_t length);
 void ar_processCommonHeadlightsState(uint8_t* data, size_t length);
 
 void ar_processMinidronePilotingState(uint8_t* data, size_t length);
+void ar_processMinidronePilotingSettingsState(uint8_t* data, size_t length);
+void ar_processMinidroneSpeedSettingsState(uint8_t* data, size_t length);
 
 void ar_processUnused(uint8_t* data, size_t length);
 
@@ -137,13 +166,13 @@ void ar_sendTakeOff();
 void ar_sendPCMD(int8_t roll, int8_t pitch, int8_t yaw, int8_t gaz, bool rollPitchFlag = true);
 void ar_sendLanding();
 void ar_sendEmergency();
-void ar_sendAutoTakeOffMode(uint8_t autoTakeOffMode);
+void ar_sendAutoTakeOffMode(bool autoTakeOffMode);
 void ar_sendTogglePilotingMode();
 
 void ar_sendMaxAltitude(float maxAltitude);
 void ar_sendMaxTilt(float maxTilt);
-// Bank turn ?
-// Max throttle / Gaz control
+void ar_sendBankedTrun(bool bankedTurn);
+void ar_sendMaxThrottle(float maxThrottle);
 void ar_sendPreferredPilotingMode(uint8_t preferredPilotingMode);
 
 void ar_sendMaxVerticalSpeed(float maxVerticalSpeed);
@@ -151,6 +180,7 @@ void ar_sendMaxRotationSpeed(float maxRotationSpeed);
 void ar_sendWheels(bool wheels);
 void ar_sendMaxHorizontalSpeed(float maxHorizontalSpeed);
 
+int16_t _ar_getCommand(uint8_t* data, size_t* length);
 
 
 #endif

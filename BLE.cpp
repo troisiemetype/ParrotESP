@@ -13,6 +13,7 @@ BLERemoteCharacteristic *chrReceiveCommandAck;
 BLERemoteCharacteristic *chrReceiveAckCommand;
 BLERemoteCharacteristic *chrReceiveAckLowLatency;
 
+// Those seems to be needed in some cases, but rolling spider goes well without
 BLERemoteCharacteristic *chrNormalFTPTransferring;
 BLERemoteCharacteristic *chrNormalFTPGetting;
 BLERemoteCharacteristic *chrNormalFTPHandling;
@@ -21,9 +22,11 @@ BLERemoteCharacteristic *chrUpdateFTPTransferring;
 BLERemoteCharacteristic *chrUpdateFTPGetting;
 BLERemoteCharacteristic *chrUpdateFTPHandling;
 
+
 BLEAdvertisedDevice *rollingSpider;
 uint8_t scanTime = 5;
-bool connect = false;
+bool connected = false;
+//BLEAddress rollingSpiderAddress;
 
 static BLEUUID ARCOMMAND_SENDING_SERVICE_UUID("9a66fa00-0800-9191-11e4-012d1540cb8e");				// Send service
 
@@ -39,6 +42,7 @@ static BLEUUID RECEIVE_DATA_WITH_ACK_UUID("9a66fb0e-0800-9191-11e4-012d1540cb8e"
 static BLEUUID RECEIVE_ACK_DATA_UUID("9a66fb1b-0800-9191-11e4-012d1540cb8e");		// ack for sent command
 static BLEUUID RECEIVE_ACK_HIGH_PRIORITY_UUID("9a66fb1c-0800-9191-11e4-012d1540cb8e");	// ack for sent low latency
 
+// Handshake UUID. Not needed with my rolling spider
 static BLEUUID NORMAL_BLE_FTP_SERVICE_UUID("9a66fd21-0800-9191-11e4-012d1540cb8e");
 
 static BLEUUID NORMAL_FTP_TRANSFERRING_UUID("9a66fd22-0800-9191-11e4-012d1540cb8e");
@@ -54,11 +58,11 @@ static BLEUUID UPDATE_FTP_HANDLING_UUID("9a66fd54-0800-9191-11e4-012d1540cb8e");
 
 
 void ble_onReceiveCommand(BLERemoteCharacteristic* pBLERemoteCharacteristic, uint8_t* data, size_t length, bool isNotify){
-
+/*
 	Serial.printf("Received %s", pBLERemoteCharacteristic->getUUID().toString().c_str());
 	Serial.print(" of data length ");
 	Serial.println(length);
-	Serial.print("\tdata: ");
+*/	Serial.printf("%i\treceived : ", millis());
 	for (uint8_t i = 0; i < length; ++i){
 		Serial.printf("%i ", data[i]);
 	}
@@ -68,11 +72,11 @@ void ble_onReceiveCommand(BLERemoteCharacteristic* pBLERemoteCharacteristic, uin
 }
 
 void ble_onReceiveCommandAck(BLERemoteCharacteristic* pBLERemoteCharacteristic, uint8_t* data, size_t length, bool isNotify){
-
+/*
 	Serial.printf("Received with ack %s", pBLERemoteCharacteristic->getUUID().toString().c_str());
 	Serial.print(" of data length ");
 	Serial.println(length);
-	Serial.print("\tdata: ");
+*/	Serial.printf("%i\treceived : ", millis());
 	for (uint8_t i = 0; i < length; ++i){
 		Serial.printf("%i ", data[i]);
 	}
@@ -84,39 +88,39 @@ void ble_onReceiveCommandAck(BLERemoteCharacteristic* pBLERemoteCharacteristic, 
 }
 
 void ble_onReceiveAckCommand(BLERemoteCharacteristic* pBLERemoteCharacteristic, uint8_t* data, size_t length, bool isNotify){
-	Serial.printf("Received Ack for command id : %i\n", data[2]);
+	Serial.printf("%i\t received Ack for command id : %i\n", millis(), data[2]);
 	ar_populateReceiveBuffer(FRAME_TYPE_ACK, data, length);
 }
 
 void ble_onReceiveAckLowLatency(BLERemoteCharacteristic* pBLERemoteCharacteristic, uint8_t* data, size_t length, bool isNotify){
-	Serial.printf("Received Ack for Low Latency id : %i\n", data[2]);
+	Serial.printf("%i\t received Ack for Low Latency id : %i\n", millis(), data[2]);
 	ar_populateReceiveBuffer(FRAME_TYPE_ACK, data, length);
 }
 
 
 class ClientCallbacks : public BLEClientCallbacks{
 	void onConnect(BLEClient* pClient){
-//		Serial.println("connected !");
+		Serial.println("connected !");
 	}
 
 	void onDisconnect(BLEClient* pClient){
 		Serial.println("disconnected !");
 		// todo : try to reconnect !
-		connect = false;
+		connected = false;
 	}
 };
 
 class AdvertisedDeviceCallbacks : public BLEAdvertisedDeviceCallbacks{
 	void onResult(BLEAdvertisedDevice advertisedDevice){
 
-		Serial.printf("Advertised Device: %s \n", advertisedDevice.toString().c_str());
+//		Serial.printf("Advertised Device: %s \n", advertisedDevice.toString().c_str());
 
 		if(strncmp(advertisedDevice.getName().c_str(), "RS_", 3)) return;
 		
 		
 		BLEDevice::getScan()->stop();
 		rollingSpider = new BLEAdvertisedDevice(advertisedDevice);
-		connect = true;
+		connected = true;
 
 		// note : we connect to the first rolling spider we find.
 		// Later we will try and use menus to display found devices on FrSky controller
@@ -141,7 +145,7 @@ bool ble_scan(){
 
 //	Serial.println();
 
-	return connect;
+	return connected;
 }
 
 void ble_connect(){
@@ -152,23 +156,28 @@ void ble_connect(){
 
 	pClient->connect(rollingSpider);
 
-	Serial.printf("connected to %s\n\n", pClient->getPeerAddress().toString().c_str());
+//	Serial.printf("connected to %s\n\n", pClient->getPeerAddress().toString().c_str());
 
 	ble_setSendCharacteristics();
 	ble_setReceiveCharacteristics();
-	ble_setHandshakeCharacteristics();
+//	ble_setHandshakeCharacteristics();
 
-	ble_shakeHands();
+//	ble_shakeHands();
 }
+
+bool ble_checkConnection(){
+	return connected;
+}
+
 
 void ble_shakeHands(){
 	uint8_t toSend[] = {0, 1, 0, 0};
-
+/*
 	chrReceiveCommand->writeValue(toSend, 4);
 	chrReceiveCommandAck->writeValue(toSend, 4);
 	chrReceiveAckCommand->writeValue(toSend, 4);
 	chrReceiveAckLowLatency->writeValue(toSend, 4);
-	
+*/	
 	chrNormalFTPTransferring->writeValue(toSend, 4);
 	chrNormalFTPGetting->writeValue(toSend, 4);
 	chrNormalFTPHandling->writeValue(toSend, 4);
@@ -403,14 +412,15 @@ void ble_sendFrame(arBuffer_t* data, uint8_t length){
 	for(uint8_t i = 0; i < length; ++i){
 		toSend[i + 2] = data->data[i];
 	}
-/*
-	Serial.printf("sending ");
+
+	Serial.printf("%i\tsending ", millis());
 	for(uint8_t i = 0; i < length + 2; ++i){
 		Serial.printf("%i ", toSend[i]);
 	}
-	Serial.printf("to remote %s\n", remote->toString().c_str());
-*/
-	remote->writeValue(toSend, length);
+	Serial.println();
+//	Serial.printf("to remote %s\n", remote->toString().c_str());
+
+	remote->writeValue(toSend, length + 2);
 }
 
 void ble_enumerateServices(){

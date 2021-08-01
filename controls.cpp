@@ -6,13 +6,14 @@ int16_t AETR[4];
 bool goFly = false;
 bool prevGoFly = false;
 
-uint8_t pilotingMode = 0;
-uint8_t prevPilotingMode = 0;
+uint8_t ch6 = 0;
+uint8_t prevCh6 = 0;
 
 void control_init(){
 	memset(rawInput, 0, (NUM_CHANNELS * sizeof(int16_t)));
 #ifdef TX_USE_PPM
 	ppm_init();
+	// todo : add throttle safety
 #else
 #endif
 }
@@ -37,14 +38,16 @@ void control_formatControls(){
 	prevGoFly = goFly;
 	if(rawInput[4] > 0) goFly = true; else goFly = false;
 
-	prevPilotingMode = pilotingMode;
-	if(rawInput[5] < 15){
-		pilotingMode = 0;
-	} else if(rawInput[5] > 15){
-		pilotingMode = 2;
+	prevCh6 = ch6;
+	if(rawInput[5] < -20){
+		ch6 = 0;
+	} else if(rawInput[5] > 20){
+		ch6 = 2;
 	} else {
-		pilotingMode = 1;
+		ch6 = 1;
 	}
+
+//	Serial.printf("ch 6 : %i\n", ch6);
 }
 
 // send last read commands from radio to buffers for BLE
@@ -69,8 +72,43 @@ void control_sendControls(){
 		}
 	}
 
-	if(pilotingMode != prevPilotingMode){
-		// Nothing for now.
+	if(ch6 != prevCh6){
+//		Serial.println("ch6 triggered");
+		switch(ch6){
+			case 0:
+				ar_sendMaxTilt(15);
+				ar_sendMaxVerticalSpeed(0.7);
+				ar_sendMaxRotationSpeed(180);
+				break;
+			case 1:
+				ar_sendMaxTilt(30);
+				ar_sendMaxVerticalSpeed(1.4);
+				ar_sendMaxRotationSpeed(360);
+				break;
+			case 2:
+				ar_sendMaxTilt(45);
+				ar_sendMaxVerticalSpeed(2.1);
+				ar_sendMaxRotationSpeed(540);
+				break;
+			default:
+				ar_sendMaxTilt(15);
+				ar_sendMaxVerticalSpeed(0.7);
+				ar_sendMaxRotationSpeed(180);
+				break;
+		}
 	}
+
+/*	if(ch6 != prevCh6){
+		Serial.println("ch6 triggered");
+		if (ch6 == 0){
+			ar_sendMaxTilt(15.0);
+
+		} else if(ch6 == 1){
+			ar_sendMaxTilt(30.0);
+
+		} else if(ch6 == 2);
+			ar_sendMaxTilt(45.0);
+	}
+	*/
 
 }

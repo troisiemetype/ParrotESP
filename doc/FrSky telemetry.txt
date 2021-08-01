@@ -1,0 +1,17 @@
+Notes about FrSky telemetry
+
+in io/frsky_sport.h :
+
+(PACK is a macro for __attribute__ __packed__)
+
+PACK(union SportTelemetryPacket
+{
+  struct {
+    uint8_t physicalId;
+    uint8_t primId;
+    uint16_t dataId;
+    uint32_t value;
+  };
+  uint8_t raw[8];
+});
+

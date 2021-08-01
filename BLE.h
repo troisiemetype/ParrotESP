@@ -17,6 +17,8 @@ void ble_init();
 bool ble_scan();
 void ble_connect();
 
+bool ble_checkConnection();
+
 void ble_shakeHands();
 
 void ble_setSendCharacteristics();

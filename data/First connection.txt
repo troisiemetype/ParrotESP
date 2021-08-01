@@ -1,0 +1,427 @@
+Advertised Device: Name: , Address: 3c:bd:3e:fc:5d:2c, serviceUUID: cbbfe0e1-f7f3-4206-84e0-84cbb3d09dfc 
+Advertised Device: Name: , Address: cb:6d:01:2c:90:9b, manufacturer data: 590001ffffffff, serviceUUID: 45839c65-9f4d-6a5f-2a43-a45b9532aab1 
+Advertised Device: Name: , Address: 7e:24:09:be:04:fd, manufacturer data: e0000103ca9aa87e, serviceUUID: 0000fe9f-0000-1000-8000-00805f9b34fb 
+[  5708][W][BLEScan.cpp:75] handleGAPEvent(): ESP_GAP_SEARCH_INQ_CMPL_EVT
+Advertised Device: Name: , Address: 7e:24:09:be:04:fd, manufacturer data: e0000103ca9aa87e, serviceUUID: 0000fe9f-0000-1000-8000-00805f9b34fb 
+Advertised Device: Name: RS_W272954, Address: a0:14:3d:68:51:ba, manufacturer data: 4300cf1900090100 
+[  7462][I][BLEDevice.cpp:622] addPeerDevice(): add conn_id: 0, GATT role: client
+connected to a0:14:3d:68:51:ba
+
+[ 16259][I][BLE.cpp:188] ble_setSendCharacteristics(): created service 9a66fa00-0800-9191-11e4-012d1540cb8e
+
+[ 16283][I][BLE.cpp:199] ble_setSendCharacteristics(): found characteristic 9a66fa0a-0800-9191-11e4-012d1540cb8e
+
+[ 16284][I][BLE.cpp:208] ble_setSendCharacteristics(): found characteristic 9a66fa0b-0800-9191-11e4-012d1540cb8e
+
+[ 16292][I][BLE.cpp:217] ble_setSendCharacteristics(): found characteristic 9a66fa0c-0800-9191-11e4-012d1540cb8e
+
+[ 16302][I][BLE.cpp:226] ble_setSendCharacteristics(): found characteristic 9a66fa1e-0800-9191-11e4-012d1540cb8e
+
+
+[ 16313][I][BLE.cpp:242] ble_setReceiveCharacteristics(): created service 9a66fb00-0800-9191-11e4-012d1540cb8e
+
+
+[ 16346][I][BLE.cpp:253] ble_setReceiveCharacteristics(): found characteristic 9a66fb0f-0800-9191-11e4-012d1540cb8e
+
+[ 16380][I][BLE.cpp:258] ble_setReceiveCharacteristics(): callback registered for receive commands
+
+[ 16381][I][BLE.cpp:267] ble_setReceiveCharacteristics(): found characteristic 9a66fb0e-0800-9191-11e4-012d1540cb8e
+
+[ 16430][I][BLE.cpp:272] ble_setReceiveCharacteristics(): callback registered for receive commands with ack
+
+[ 16431][I][BLE.cpp:281] ble_setReceiveCharacteristics(): found characteristic 9a66fb1b-0800-9191-11e4-012d1540cb8e
+
+[ 16480][I][BLE.cpp:286] ble_setReceiveCharacteristics(): callback registered for acks from commands
+
+[ 16481][I][BLE.cpp:295] ble_setReceiveCharacteristics(): found characteristic 9a66fb1c-0800-9191-11e4-012d1540cb8e
+
+[ 16530][I][BLE.cpp:300] ble_setReceiveCharacteristics(): callback registered for acks from low latency
+
+
+[ 16531][I][BLE.cpp:313] ble_setHandshakeCharacteristics(): created service 9a66fd21-0800-9191-11e4-012d1540cb8e
+
+[ 16541][I][BLE.cpp:323] ble_setHandshakeCharacteristics(): found characteristic 9a66fd22-0800-9191-11e4-012d1540cb8e
+
+[ 16549][I][BLE.cpp:331] ble_setHandshakeCharacteristics(): found characteristic 9a66fd23-0800-9191-11e4-012d1540cb8e
+
+[ 16560][I][BLE.cpp:339] ble_setHandshakeCharacteristics(): found characteristic 9a66fd24-0800-9191-11e4-012d1540cb8e
+
+[ 16570][I][BLE.cpp:347] ble_setHandshakeCharacteristics(): created service 9a66fd51-0800-9191-11e4-012d1540cb8e
+
+[ 16583][I][BLE.cpp:357] ble_setHandshakeCharacteristics(): found characteristic 9a66fd52-0800-9191-11e4-012d1540cb8e
+
+[ 16591][I][BLE.cpp:365] ble_setHandshakeCharacteristics(): found characteristic 9a66fd53-0800-9191-11e4-012d1540cb8e
+
+[ 16601][I][BLE.cpp:373] ble_setHandshakeCharacteristics(): found characteristic 9a66fd54-0800-9191-11e4-012d1540cb8e
+
+sending 4 0 0 2 0 0 to remote Characteristic: uuid: 9a66fa0b-0800-9191-11e4-012d1540cb8e, handle: 67 0x0043, props: broadcast: 0, read: 0, write_nr: 1, write: 0, notify: 0, indicate: 0, auth: 0
+Received with ack 9a66fb0e-0800-9191-11e4-012d1540cb8e of data length 17
+	data: 4 1 0 3 2 0 82 83 95 87 50 55 50 57 53 52 0 
+unpack frame 0 : class : 3 command : 2, unused data : Received Ack for command id : 0
+82 83 95 87 50 55 50 57 53 52 0 
+
+sending 1 0 1 to remote Characteristic: uuid: 9a66fa1e-0800-9191-11e4-012d1540cb8e, handle: 124 0x007c, props: broadcast: 0, read: 0, write_nr: 1, write: 0, notify: 0, indicate: 0, auth: 0
+Received with ack 9a66fb0e-0800-9191-11e4-012d1540cb8e of data length 16
+	data: 4 2 0 3 4 0 80 73 48 52 48 51 49 57 65 0 
+unpack frame 0 : class : 3 command : 4, unused data : 80 73 48 52 48 51 49 57 65 0 
+
+sending 1 1 2 to remote Characteristic: uuid: 9a66fa1e-0800-9191-11e4-012d1540cb8e, handle: 124 0x007c, props: broadcast: 0, read: 0, write_nr: 1, write: 0, notify: 0, indicate: 0, auth: 0
+Received with ack 9a66fb0e-0800-9191-11e4-012d1540cb8e of data length 16
+	data: 4 3 0 3 5 0 69 53 65 50 55 50 57 53 52 0 
+unpack frame 0 : class : 3 command : 5, unused data : 69 53 65 50 55 50 57 53 52 0 
+
+sending 1 2 3 to remote Characteristic: uuid: 9a66fa1e-0800-9191-11e4-012d1540cb8e, handle: 124 0x007c, props: broadcast: 0, read: 0, write_nr: 1, write: 0, notify: 0, indicate: 0, auth: 0
+Received with ack 9a66fb0e-0800-9191-11e4-012d1540cb8e of data length 20
+	data: 4 4 0 3 3 0 49 46 48 46 49 48 51 0 72 87 95 32 53 0 
+unpack frame 0 : class : 3 command : 3, unused data : 49 46 48 46 49 48 51 0 72 87 95 32 53 0 
+
+sending 1 3 4 to remote Characteristic: uuid: 9a66fa1e-0800-9191-11e4-012d1540cb8e, handle: 124 0x007c, props: broadcast: 0, read: 0, write_nr: 1, write: 0, notify: 0, indicate: 0, auth: 0
+Received with ack 9a66fb0e-0800-9191-11e4-012d1540cb8e of data length 7
+	data: 4 5 0 3 7 0 1 
+unpack frame 0 : class : 3 command : 7, unused data : 1 
+
+sending 1 4 5 to remote Characteristic: uuid: 9a66fa1e-0800-9191-11e4-012d1540cb8e, handle: 124 0x007c, props: broadcast: 0, read: 0, write_nr: 1, write: 0, notify: 0, indicate: 0, auth: 0
+Received with ack 9a66fb0e-0800-9191-11e4-012d1540cb8e of data length 9
+	data: 4 6 0 3 6 0 88 86 0 
+unpack frame 0 : class : 3 command : 6, unused data : 88 86 0 
+
+sending 1 5 6 to remote Characteristic: uuid: 9a66fa1e-0800-9191-11e4-012d1540cb8e, handle: 124 0x007c, props: broadcast: 0, read: 0, write_nr: 1, write: 0, notify: 0, indicate: 0, auth: 0
+Received with ack 9a66fb0e-0800-9191-11e4-012d1540cb8e of data length 7
+	data: 4 7 2 5 2 0 0 
+unpack frame 2 : class : 5 command : 2, unused data : 0 
+sending 1 6 7 to remote Characteristic: uuid: 9a66fa1e-0800-9191-11e4-012d1540cb8e, handle: 124 0x007c, props: broadcast: 0, read: 0, write_nr: 1, write: 0, notify: 0, indicate: 0, auth: 0
+Received with ack 9a66fb0e-0800-9191-11e4-012d1540cb8e of data length 18
+	data: 4 8 2 9 0 0 0 0 0 64 0 0 0 64 0 0 32 65 
+unpack frame 2 : class : 9 command : 0, unused data : 0 0 0 64 0 0 0 64 0 0 32 65 
+sending 1 7 8 to remote Characteristic: uuid: 9a66fa1e-0800-9191-11e4-012d1540cb8e, handle: 124 0x007c, props: broadcast: 0, read: 0, write_nr: 1, write: 0, notify: 0, indicate: 0, auth: 0
+Received with ack 9a66fb0e-0800-9191-11e4-012d1540cb8e of data length 18
+	data: 4 9 2 9 1 0 0 0 112 65 0 0 160 64 0 0 200 65 
+unpack frame 2 : class : 9 command : 1, unused data : 0 0 112 65 0 0 160 64 0 0 200 65 
+sending 1 8 9 to remote Characteristic: uuid: 9a66fa1e-0800-9191-11e4-012d1540cb8e, handle: 124 0x007c, props: broadcast: 0, read: 0, write_nr: 1, write: 0, notify: 0, indicate: 0, auth: 0
+Received with ack 9a66fb0e-0800-9191-11e4-012d1540cb8e of data length 18
+	data: 4 10 2 5 0 0 51 51 51 63 0 0 0 63 0 0 0 64 
+unpack frame 2 : class : 5 command : 0, unused data : 51 51 51 63 0 0 0 63 0 0 0 64 
+sending 1 9 10 to remote Characteristic: uuid: 9a66fa1e-0800-9191-11e4-012d1540cb8e, handle: 124 0x007c, props: broadcast: 0, read: 0, write_nr: 1, write: 0, notify: 0, indicate: 0, auth: 0
+Received with ack 9a66fb0e-0800-9191-11e4-012d1540cb8e of data length 18
+	data: 4 11 2 5 1 0 0 0 57 67 0 0 72 66 0 0 180 67 
+unpack frame 2 : class : 5 command : 1, unused data : 0 0 57 67 0 0 72 66 0 0 180 67 
+sending 1 10 11 to remote Characteristic: uuid: 9a66fa1e-0800-9191-11e4-012d1540cb8e, handle: 124 0x007c, props: broadcast: 0, read: 0, write_nr: 1, write: 0, notify: 0, indicate: 0, auth: 0
+Received with ack 9a66fb0e-0800-9191-11e4-012d1540cb8e of data length 6
+	data: 4 12 0 3 0 0 
+unpack frame 0 : class : 3 command : 0, unused data : 
+
+sending 1 11 12 to remote Characteristic: uuid: 9a66fa1e-0800-9191-11e4-012d1540cb8e, handle: 124 0x007c, props: broadcast: 0, read: 0, write_nr: 1, write: 0, notify: 0, indicate: 0, auth: 0
+Received with ack 9a66fb0e-0800-9191-11e4-012d1540cb8e of data length 7
+	data: 4 13 2 11 2 0 0 
+unpack frame 2 : class : 11 command : 2, unused data : 0 
+sending 1 12 13 to remote Characteristic: uuid: 9a66fa1e-0800-9191-11e4-012d1540cb8e, handle: 124 0x007c, props: broadcast: 0, read: 0, write_nr: 1, write: 0, notify: 0, indicate: 0, auth: 0
+sending 4 1 2 0 1 0 to remote Characteristic: uuid: 9a66fa0b-0800-9191-11e4-012d1540cb8e, handle: 67 0x0043, props: broadcast: 0, read: 0, write_nr: 1, write: 0, notify: 0, indicate: 0, auth: 0
+sending 4 2 2 0 1 0 to remote Characteristic: uuid: 9a66fa0b-0800-9191-11e4-012d1540cb8e, handle: 67 0x0043, props: broadcast: 0, read: 0, write_nr: 1, write: 0, notify: 0, indicate: 0, auth: 0
+Received Ack for command id : 2
+Received with ack 9a66fb0e-0800-9191-11e4-012d1540cb8e of data length 10
+	data: 4 14 2 3 1 0 1 0 0 0 
+unpack frame 2 : class : 3 flying state : 1
+sending 1 13 14 to remote Characteristic: uuid: 9a66fa1e-0800-9191-11e4-012d1540cb8e, handle: 124 0x007c, props: broadcast: 0, read: 0, write_nr: 1, write: 0, notify: 0, indicate: 0, auth: 0
+Received 9a66fb0f-0800-9191-11e4-012d1540cb8e of data length 7
+	data: 2 1 0 5 1 0 95 
+unpack frame 0 : class : 5 battery : 95
+
+Received with ack 9a66fb0e-0800-9191-11e4-012d1540cb8e of data length 10
+	data: 4 14 2 3 1 0 1 0 0 0 
+unpack frame 2 : class : 3 flying state : 1
+sending 1 14 14 to remote Characteristic: uuid: 9a66fa1e-0800-9191-11e4-012d1540cb8e, handle: 124 0x007c, props: broadcast: 0, read: 0, write_nr: 1, write: 0, notify: 0, indicate: 0, auth: 0
+Received 9a66fb0f-0800-9191-11e4-012d1540cb8e of data length 7
+	data: 2 2 0 5 1 0 94 
+unpack frame 0 : class : 5 battery : 94
+
+Received 9a66fb0f-0800-9191-11e4-012d1540cb8e of data length 7
+	data: 2 3 0 5 1 0 93 
+unpack frame 0 : class : 5 battery : 93
+
+Received with ack 9a66fb0e-0800-9191-11e4-012d1540cb8e of data length 10
+	data: 4 15 2 3 1 0 1 0 0 0 
+unpack frame 2 : class : 3 flying state : 1
+sending 1 15 15 to remote Characteristic: uuid: 9a66fa1e-0800-9191-11e4-012d1540cb8e, handle: 124 0x007c, props: broadcast: 0, read: 0, write_nr: 1, write: 0, notify: 0, indicate: 0, auth: 0
+Received with ack 9a66fb0e-0800-9191-11e4-012d1540cb8e of data length 10
+	data: 4 15 2 3 1 0 1 0 0 0 
+unpack frame 2 : class : 3 flying state : 1
+sending 1 16 15 to remote Characteristic: uuid: 9a66fa1e-0800-9191-11e4-012d1540cb8e, handle: 124 0x007c, props: broadcast: 0, read: 0, write_nr: 1, write: 0, notify: 0, indicate: 0, auth: 0
+
+
+
+/////////////////////////////////////////////////////
+Second connection
+/////////////////////////////////////////////////////
+
+Advertised Device: Name: RS_W272954, Address: a0:14:3d:68:51:ba, manufacturer data: 4300cf1900090100 
+Advertised Device: Name: , Address: 3c:bd:3e:fc:5d:2c, serviceUUID: cbbfe0e1-f7f3-4206-84e0-84cbb3d09dfc 
+Advertised Device: Name: RS_W272954, Address: a0:14:3d:68:51:ba, manufacturer data: 4300cf1900090100 
+[  1916][I][BLEDevice.cpp:622] addPeerDevice(): add conn_id: 0, GATT role: client
+connected to a0:14:3d:68:51:ba
+
+[ 10377][I][BLE.cpp:188] ble_setSendCharacteristics(): created service 9a66fa00-0800-9191-11e4-012d1540cb8e
+
+[ 10400][I][BLE.cpp:199] ble_setSendCharacteristics(): found characteristic 9a66fa0a-0800-9191-11e4-012d1540cb8e
+
+[ 10401][I][BLE.cpp:208] ble_setSendCharacteristics(): found characteristic 9a66fa0b-0800-9191-11e4-012d1540cb8e
+
+[ 10409][I][BLE.cpp:217] ble_setSendCharacteristics(): found characteristic 9a66fa0c-0800-9191-11e4-012d1540cb8e
+
+[ 10420][I][BLE.cpp:226] ble_setSendCharacteristics(): found characteristic 9a66fa1e-0800-9191-11e4-012d1540cb8e
+
+
+[ 10430][I][BLE.cpp:242] ble_setReceiveCharacteristics(): created service 9a66fb00-0800-9191-11e4-012d1540cb8e
+
+
+[ 10463][I][BLE.cpp:253] ble_setReceiveCharacteristics(): found characteristic 9a66fb0f-0800-9191-11e4-012d1540cb8e
+
+[ 10499][I][BLE.cpp:258] ble_setReceiveCharacteristics(): callback registered for receive commands
+
+[ 10499][I][BLE.cpp:267] ble_setReceiveCharacteristics(): found characteristic 9a66fb0e-0800-9191-11e4-012d1540cb8e
+
+[ 10548][I][BLE.cpp:272] ble_setReceiveCharacteristics(): callback registered for receive commands with ack
+
+[ 10548][I][BLE.cpp:281] ble_setReceiveCharacteristics(): found characteristic 9a66fb1b-0800-9191-11e4-012d1540cb8e
+
+[ 10598][I][BLE.cpp:286] ble_setReceiveCharacteristics(): callback registered for acks from commands
+
+[ 10598][I][BLE.cpp:295] ble_setReceiveCharacteristics(): found characteristic 9a66fb1c-0800-9191-11e4-012d1540cb8e
+
+[ 10648][I][BLE.cpp:300] ble_setReceiveCharacteristics(): callback registered for acks from low latency
+
+
+[ 10648][I][BLE.cpp:313] ble_setHandshakeCharacteristics(): created service 9a66fd21-0800-9191-11e4-012d1540cb8e
+
+[ 10659][I][BLE.cpp:323] ble_setHandshakeCharacteristics(): found characteristic 9a66fd22-0800-9191-11e4-012d1540cb8e
+
+[ 10667][I][BLE.cpp:331] ble_setHandshakeCharacteristics(): found characteristic 9a66fd23-0800-9191-11e4-012d1540cb8e
+
+[ 10677][I][BLE.cpp:339] ble_setHandshakeCharacteristics(): found characteristic 9a66fd24-0800-9191-11e4-012d1540cb8e
+
+[ 10688][I][BLE.cpp:347] ble_setHandshakeCharacteristics(): created service 9a66fd51-0800-9191-11e4-012d1540cb8e
+
+[ 10700][I][BLE.cpp:357] ble_setHandshakeCharacteristics(): found characteristic 9a66fd52-0800-9191-11e4-012d1540cb8e
+
+[ 10709][I][BLE.cpp:365] ble_setHandshakeCharacteristics(): found characteristic 9a66fd53-0800-9191-11e4-012d1540cb8e
+
+[ 10719][I][BLE.cpp:373] ble_setHandshakeCharacteristics(): found characteristic 9a66fd54-0800-9191-11e4-012d1540cb8e
+
+sending 4 0 0 2 0 0 to remote Characteristic: uuid: 9a66fa0b-0800-9191-11e4-012d1540cb8e, handle: 67 0x0043, props: broadcast: 0, read: 0, write_nr: 1, write: 0, notify: 0, indicate: 0, auth: 0
+Received with ack 9a66fb0e-0800-9191-11e4-012d1540cb8e of data length 17
+	data: 4 1 0 3 2 0 82 83 95 87 50 55 50 57 53 52 0 
+unpack frame 0 : class : 3 command : 2, unused data : Received Ack for command id : 0
+82 83 95 87 50 55 50 57 53 52 0 
+
+sending 1 0 1 to remote Characteristic: uuid: 9a66fa1e-0800-9191-11e4-012d1540cb8e, handle: 124 0x007c, props: broadcast: 0, read: 0, write_nr: 1, write: 0, notify: 0, indicate: 0, auth: 0
+Received with ack 9a66fb0e-0800-9191-11e4-012d1540cb8e of data length 16
+	data: 4 2 0 3 4 0 80 73 48 52 48 51 49 57 65 0 
+unpack frame 0 : class : 3 command : 4, unused data : 80 73 48 52 48 51 49 57 65 0 
+
+sending 1 1 2 to remote Characteristic: uuid: 9a66fa1e-0800-9191-11e4-012d1540cb8e, handle: 124 0x007c, props: broadcast: 0, read: 0, write_nr: 1, write: 0, notify: 0, indicate: 0, auth: 0
+Received with ack 9a66fb0e-0800-9191-11e4-012d1540cb8e of data length 16
+	data: 4 3 0 3 5 0 69 53 65 50 55 50 57 53 52 0 
+unpack frame 0 : class : 3 command : 5, unused data : 69 53 65 50 55 50 57 53 52 0 
+
+sending 1 2 3 to remote Characteristic: uuid: 9a66fa1e-0800-9191-11e4-012d1540cb8e, handle: 124 0x007c, props: broadcast: 0, read: 0, write_nr: 1, write: 0, notify: 0, indicate: 0, auth: 0
+Received with ack 9a66fb0e-0800-9191-11e4-012d1540cb8e of data length 20
+	data: 4 4 0 3 3 0 49 46 48 46 49 48 51 0 72 87 95 32 53 0 
+unpack frame 0 : class : 3 command : 3, unused data : 49 46 48 46 49 48 51 0 72 87 95 32 53 0 
+
+sending 1 3 4 to remote Characteristic: uuid: 9a66fa1e-0800-9191-11e4-012d1540cb8e, handle: 124 0x007c, props: broadcast: 0, read: 0, write_nr: 1, write: 0, notify: 0, indicate: 0, auth: 0
+Received with ack 9a66fb0e-0800-9191-11e4-012d1540cb8e of data length 7
+	data: 4 5 0 3 7 0 1 
+unpack frame 0 : class : 3 command : 7, unused data : 1 
+
+sending 1 4 5 to remote Characteristic: uuid: 9a66fa1e-0800-9191-11e4-012d1540cb8e, handle: 124 0x007c, props: broadcast: 0, read: 0, write_nr: 1, write: 0, notify: 0, indicate: 0, auth: 0
+Received with ack 9a66fb0e-0800-9191-11e4-012d1540cb8e of data length 9
+	data: 4 6 0 3 6 0 88 86 0 
+unpack frame 0 : class : 3 command : 6, unused data : 88 86 0 
+
+sending 1 5 6 to remote Characteristic: uuid: 9a66fa1e-0800-9191-11e4-012d1540cb8e, handle: 124 0x007c, props: broadcast: 0, read: 0, write_nr: 1, write: 0, notify: 0, indicate: 0, auth: 0
+Received with ack 9a66fb0e-0800-9191-11e4-012d1540cb8e of data length 7
+	data: 4 7 2 5 2 0 0 
+unpack frame 2 : class : 5 command : 2, unused data : 0 
+sending 1 6 7 to remote Characteristic: uuid: 9a66fa1e-0800-9191-11e4-012d1540cb8e, handle: 124 0x007c, props: broadcast: 0, read: 0, write_nr: 1, write: 0, notify: 0, indicate: 0, auth: 0
+Received with ack 9a66fb0e-0800-9191-11e4-012d1540cb8e of data length 18
+	data: 4 8 2 9 0 0 0 0 0 64 0 0 0 64 0 0 32 65 
+unpack frame 2 : class : 9 command : 0, unused data : 0 0 0 64 0 0 0 64 0 0 32 65 
+sending 1 7 8 to remote Characteristic: uuid: 9a66fa1e-0800-9191-11e4-012d1540cb8e, handle: 124 0x007c, props: broadcast: 0, read: 0, write_nr: 1, write: 0, notify: 0, indicate: 0, auth: 0
+Received with ack 9a66fb0e-0800-9191-11e4-012d1540cb8e of data length 18
+	data: 4 9 2 9 1 0 0 0 112 65 0 0 160 64 0 0 200 65 
+unpack frame 2 : class : 9 command : 1, unused data : 0 0 112 65 0 0 160 64 0 0 200 65 
+sending 1 8 9 to remote Characteristic: uuid: 9a66fa1e-0800-9191-11e4-012d1540cb8e, handle: 124 0x007c, props: broadcast: 0, read: 0, write_nr: 1, write: 0, notify: 0, indicate: 0, auth: 0
+Received with ack 9a66fb0e-0800-9191-11e4-012d1540cb8e of data length 18
+	data: 4 10 2 5 0 0 51 51 51 63 0 0 0 63 0 0 0 64 
+unpack frame 2 : class : 5 command : 0, unused data : 51 51 51 63 0 0 0 63 0 0 0 64 
+sending 1 9 10 to remote Characteristic: uuid: 9a66fa1e-0800-9191-11e4-012d1540cb8e, handle: 124 0x007c, props: broadcast: 0, read: 0, write_nr: 1, write: 0, notify: 0, indicate: 0, auth: 0
+Received with ack 9a66fb0e-0800-9191-11e4-012d1540cb8e of data length 18
+	data: 4 11 2 5 1 0 0 0 57 67 0 0 72 66 0 0 180 67 
+unpack frame 2 : class : 5 command : 1, unused data : 0 0 57 67 0 0 72 66 0 0 180 67 
+sending 1 10 11 to remote Characteristic: uuid: 9a66fa1e-0800-9191-11e4-012d1540cb8e, handle: 124 0x007c, props: broadcast: 0, read: 0, write_nr: 1, write: 0, notify: 0, indicate: 0, auth: 0
+Received with ack 9a66fb0e-0800-9191-11e4-012d1540cb8e of data length 6
+	data: 4 12 0 3 0 0 
+unpack frame 0 : class : 3 command : 0, unused data : 
+
+sending 1 11 12 to remote Characteristic: uuid: 9a66fa1e-0800-9191-11e4-012d1540cb8e, handle: 124 0x007c, props: broadcast: 0, read: 0, write_nr: 1, write: 0, notify: 0, indicate: 0, auth: 0
+Received with ack 9a66fb0e-0800-9191-11e4-012d1540cb8e of data length 7
+	data: 4 13 2 11 2 0 0 
+unpack frame 2 : class : 11 command : 2, unused data : 0 
+sending 1 12 13 to remote Characteristic: uuid: 9a66fa1e-0800-9191-11e4-012d1540cb8e, handle: 124 0x007c, props: broadcast: 0, read: 0, write_nr: 1, write: 0, notify: 0, indicate: 0, auth: 0
+sending 4 1 2 0 1 0 to remote Characteristic: uuid: 9a66fa0b-0800-9191-11e4-012d1540cb8e, handle: 67 0x0043, props: broadcast: 0, read: 0, write_nr: 1, write: 0, notify: 0, indicate: 0, auth: 0
+Received Ack for command id : 1
+Received with ack 9a66fb0e-0800-9191-11e4-012d1540cb8e of data length 10
+	data: 4 14 2 3 1 0 1 0 0 0 
+unpack frame 2 : class : 3 flying state : 1
+sending 1 13 14 to remote Characteristic: uuid: 9a66fa1e-0800-9191-11e4-012d1540cb8e, handle: 124 0x007c, props: broadcast: 0, read: 0, write_nr: 1, write: 0, notify: 0, indicate: 0, auth: 0
+Received 9a66fb0f-0800-9191-11e4-012d1540cb8e of data length 7
+	data: 2 1 0 5 1 0 95 
+unpack frame 0 : class : 5 battery : 95
+
+Received 9a66fb0f-0800-9191-11e4-012d1540cb8e of data length 7
+	data: 2 2 0 5 1 0 94 
+unpack frame 0 : class : 5 battery : 94
+
+Received with ack 9a66fb0e-0800-9191-11e4-012d1540cb8e of data length 10
+	data: 4 15 2 3 1 0 1 0 0 0 
+unpack frame 2 : class : 3 flying state : 1
+sending 1 14 15 to remote Characteristic: uuid: 9a66fa1e-0800-9191-11e4-012d1540cb8e, handle: 124 0x007c, props: broadcast: 0, read: 0, write_nr: 1, write: 0, notify: 0, indicate: 0, auth: 0
+Received with ack 9a66fb0e-0800-9191-11e4-012d1540cb8e of data length 10
+	data: 4 16 2 3 1 0 2 0 0 0 
+unpack frame 2 : class : 3 flying state : 2
+sending 1 15 16 to remote Characteristic: uuid: 9a66fa1e-0800-9191-11e4-012d1540cb8e, handle: 124 0x007c, props: broadcast: 0, read: 0, write_nr: 1, write: 0, notify: 0, indicate: 0, auth: 0
+Received 9a66fb0f-0800-9191-11e4-012d1540cb8e of data length 7
+	data: 2 3 0 5 1 0 93 
+unpack frame 0 : class : 5 battery : 93
+
+Received 9a66fb0f-0800-9191-11e4-012d1540cb8e of data length 7
+	data: 2 4 0 5 1 0 92 
+unpack frame 0 : class : 5 battery : 92
+
+Received 9a66fb0f-0800-9191-11e4-012d1540cb8e of data length 7
+	data: 2 5 0 5 1 0 91 
+unpack frame 0 : class : 5 battery : 91
+
+Received 9a66fb0f-0800-9191-11e4-012d1540cb8e of data length 7
+	data: 2 6 0 5 1 0 90 
+unpack frame 0 : class : 5 battery : 90
+
+Received 9a66fb0f-0800-9191-11e4-012d1540cb8e of data length 7
+	data: 2 7 0 5 1 0 89 
+unpack frame 0 : class : 5 battery : 89
+
+Received 9a66fb0f-0800-9191-11e4-012d1540cb8e of data length 7
+	data: 2 8 0 5 1 0 88 
+unpack frame 0 : class : 5 battery : 88
+
+Received 9a66fb0f-0800-9191-11e4-012d1540cb8e of data length 7
+	data: 2 9 0 5 1 0 87 
+unpack frame 0 : class : 5 battery : 87
+
+Received 9a66fb0f-0800-9191-11e4-012d1540cb8e of data length 7
+	data: 2 10 0 5 1 0 86 
+unpack frame 0 : class : 5 battery : 86
+
+Received 9a66fb0f-0800-9191-11e4-012d1540cb8e of data length 7
+	data: 2 11 0 5 1 0 85 
+unpack frame 0 : class : 5 battery : 85
+
+Received 9a66fb0f-0800-9191-11e4-012d1540cb8e of data length 7
+	data: 2 12 0 5 1 0 84 
+unpack frame 0 : class : 5 battery : 84
+
+Received 9a66fb0f-0800-9191-11e4-012d1540cb8e of data length 7
+	data: 2 13 0 5 1 0 83 
+unpack frame 0 : class : 5 battery : 83
+
+Received 9a66fb0f-0800-9191-11e4-012d1540cb8e of data length 7
+	data: 2 14 0 5 1 0 82 
+unpack frame 0 : class : 5 battery : 82
+
+Received 9a66fb0f-0800-9191-11e4-012d1540cb8e of data length 7
+	data: 2 15 0 5 1 0 81 
+unpack frame 0 : class : 5 battery : 81
+
+Received 9a66fb0f-0800-9191-11e4-012d1540cb8e of data length 7
+	data: 2 16 0 5 1 0 80 
+unpack frame 0 : class : 5 battery : 80
+
+Received 9a66fb0f-0800-9191-11e4-012d1540cb8e of data length 7
+	data: 2 17 0 5 1 0 79 
+unpack frame 0 : class : 5 battery : 79
+
+Received 9a66fb0f-0800-9191-11e4-012d1540cb8e of data length 7
+	data: 2 18 0 5 1 0 78 
+unpack frame 0 : class : 5 battery : 78
+
+Received 9a66fb0f-0800-9191-11e4-012d1540cb8e of data length 7
+	data: 2 19 0 5 1 0 77 
+unpack frame 0 : class : 5 battery : 77
+
+Received 9a66fb0f-0800-9191-11e4-012d1540cb8e of data length 7
+	data: 2 20 0 5 1 0 76 
+unpack frame 0 : class : 5 battery : 76
+
+Received 9a66fb0f-0800-9191-11e4-012d1540cb8e of data length 7
+	data: 2 21 0 5 1 0 75 
+unpack frame 0 : class : 5 battery : 75
+
+Received 9a66fb0f-0800-9191-11e4-012d1540cb8e of data length 7
+	data: 2 22 0 5 1 0 74 
+unpack frame 0 : class : 5 battery : 74
+
+Received 9a66fb0f-0800-9191-11e4-012d1540cb8e of data length 7
+	data: 2 23 0 5 1 0 73 
+unpack frame 0 : class : 5 battery : 73
+
+Received 9a66fb0f-0800-9191-11e4-012d1540cb8e of data length 7
+	data: 2 24 0 5 1 0 72 
+unpack frame 0 : class : 5 battery : 72
+
+Received 9a66fb0f-0800-9191-11e4-012d1540cb8e of data length 7
+	data: 2 25 0 5 1 0 71 
+unpack frame 0 : class : 5 battery : 71
+
+Received 9a66fb0f-0800-9191-11e4-012d1540cb8e of data length 7
+	data: 2 26 0 5 1 0 70 
+unpack frame 0 : class : 5 battery : 70
+
+Received 9a66fb0f-0800-9191-11e4-012d1540cb8e of data length 7
+	data: 2 27 0 5 1 0 69 
+unpack frame 0 : class : 5 battery : 69
+
+Received 9a66fb0f-0800-9191-11e4-012d1540cb8e of data length 7
+	data: 2 28 0 5 1 0 68 
+unpack frame 0 : class : 5 battery : 68
+
+Received 9a66fb0f-0800-9191-11e4-012d1540cb8e of data length 7
+	data: 2 29 0 5 1 0 67 
+unpack frame 0 : class : 5 battery : 67
+
+Received 9a66fb0f-0800-9191-11e4-012d1540cb8e of data length 7
+	data: 2 30 0 5 1 0 66 
+unpack frame 0 : class : 5 battery : 66
+
+Received 9a66fb0f-0800-9191-11e4-012d1540cb8e of data length 7
+	data: 2 31 0 5 1 0 65 
+unpack frame 0 : class : 5 battery : 65
+
+Received 9a66fb0f-0800-9191-11e4-012d1540cb8e of data length 7
+	data: 2 32 0 5 1 0 64 
+unpack frame 0 : class : 5 battery : 64
+
+Received 9a66fb0f-0800-9191-11e4-012d1540cb8e of data length 7
+	data: 2 33 0 5 1 0 63 
+unpack frame 0 : class : 5 battery : 63
+
+Received 9a66fb0f-0800-9191-11e4-012d1540cb8e of data length 7
+	data: 2 34 0 5 1 0 62 
+unpack frame 0 : class : 5 battery : 62
+
+Received 9a66fb0f-0800-9191-11e4-012d1540cb8e of data length 7
+	data: 2 35 0 5 1 0 61 
+unpack frame 0 : class : 5 battery : 61
+
+Received 9a66fb0f-0800-9191-11e4-012d1540cb8e of data length 7
+	data: 2 36 0 5 1 0 60 
+unpack frame 0 : class : 5 battery : 60
+

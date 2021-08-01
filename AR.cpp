@@ -18,6 +18,8 @@
  *	(which are indeed enumerated when iterating through all services and characteristics)
  *	
  *	Each of these services enumerate 3 characteristics, each of one has to be sent 0x0100 for the handshake to be completed.
+ *
+ *	After first tries it seems this handshake is not needed for Rolling Spider !
  */
 
 const size_t SEND_BUFFER_SIZE = 32;
@@ -80,7 +82,17 @@ void ar_bufferState(arBufferQueue_t* queue, char* name, bool displayBuffer){
 }
 
 void ar_bufferContent(arBuffer_t* buffer){
-
+	Serial.printf("buffer at address %i\n", (int32_t)buffer);
+	Serial.printf("\tframe type : %i\n", buffer->frameType);
+	Serial.printf("\tsequence number : %i\n", buffer->sequenceNumber);
+	Serial.printf("\tdata : ");
+	for(uint8_t i = 0; i < buffer->length; ++i){
+		Serial.printf("%i ", buffer->data[i]);
+	}
+	Serial.printf("\n\tlength : %i\n", buffer->length);
+	Serial.printf("\ttimestamp : %i\n", buffer->timestamp);
+	Serial.printf("\tretry : %i\n", buffer->retry);
+	Serial.println();
 }
 
 
@@ -106,8 +118,11 @@ void ar_populateReceiveBuffer(arFrameType_t frameType, uint8_t* data, uint8_t le
 
 }
 
-void ar_populateSendBuffer(arFrameType_t frameType, uint8_t* data, uint8_t length){
+// TODO : need to understand why it's populated twice for some commandes !
+void ar_populateSendBuffer(arFrameType_t frameType, uint8_t* data, uint8_t length, uint8_t retry){
 	if(sendQueue.room <= 0) return;
+
+//	Serial.println("populating send buffer");
 
 	arBuffer_t *bf;
 
@@ -119,6 +134,7 @@ void ar_populateSendBuffer(arFrameType_t frameType, uint8_t* data, uint8_t lengt
 
 	bf->frameType = frameType;
 	bf->length = length;
+	bf->retry = retry;
 	memcpy(bf->data, data, length);
 
 	switch(frameType){
@@ -144,6 +160,21 @@ void ar_populateSendBuffer(arFrameType_t frameType, uint8_t* data, uint8_t lengt
 	sendQueue.room--;
 
 //	ar_bufferState(&sendQueue, "queued, send");
+//	ar_bufferContent(bf);
+}
+
+void ar_populateAckBuffer(arBuffer_t* buffer){
+	if(ackQueue.room <= 0) return;
+
+//	Serial.printf("Populating Ack buffer.\n");
+	arBuffer_t *bf = ackQueue.write;
+
+	memcpy(bf, buffer, sizeof(arBuffer_t));
+	bf->timestamp = millis();
+
+//	ar_bufferContent(bf);
+	ackQueue.write = bf->next;
+	ackQueue.room--;
 }
 
 void ar_checkReceiveBuffer(){
@@ -160,10 +191,9 @@ void ar_checkReceiveBuffer(){
 			ar_unpackFrame(bf->data, bf->length);
 			break;
 		case FRAME_TYPE_ACK:
-			// todo
-			receiveQueue.run = receiveQueue.run->next;
+			ar_processAck(bf->data[0]);
+			receiveQueue.run = bf->next;
 			receiveQueue.room++;
-//			ar_bufferState(&receiveQueue, "processed, receive");
 			break;
 		default:
 			break;
@@ -173,16 +203,57 @@ void ar_checkReceiveBuffer(){
 
 void ar_checkSendBuffer(){
 	if(sendQueue.room == sendQueue.size) return;
-	ble_sendFrame(sendQueue.run, sendQueue.run->length);
-	sendQueue.run = sendQueue.run->next;
+
+	arBuffer_t *bf = sendQueue.run;
+	
+	if(bf->frameType == FRAME_TYPE_LOW_LATENCY || bf->frameType == FRAME_TYPE_DATA_WITH_ACK){
+		ar_populateAckBuffer(bf);
+	}
+
+	ble_sendFrame(bf, bf->length);
+	sendQueue.run = bf->next;
 	sendQueue.room++;
 
 //	ar_bufferState(&sendQueue, "processed, send");
 }
 
+void ar_checkAckBuffer(){
+	if(ackQueue.room == ackQueue.size) return;
+//	Serial.println("Checking Ack buffer.");
+
+	uint32_t now = millis();
+	arBuffer_t *bf = ackQueue.run;
+/*
+	Serial.printf("now : %i\n", now);
+	Serial.printf("timestamp : %i\n", bf->timestamp);
+	ar_bufferContent(bf);	
+*/
+	if((now - bf->timestamp) > FRAME_TIMEOUT){
+//		Serial.printf("timeout %i, re-send buffer %i\n", (now - bf->timestamp), bf->sequenceNumber);
+		if(--bf->retry > 0){
+			// pass the number of remaining retry
+			ar_populateSendBuffer(bf->frameType, bf->data, bf->length, bf->retry);
+		}
+
+		ackQueue.run = bf->next;
+		ackQueue.room++;
+	}
+//	ar_bufferState(&ackQueue, "ack");
+}
+
+void ar_processAck(uint8_t sequenceNumber){
+//	Serial.printf("checking ack id : %i\n", sequenceNumber);
+	arBuffer_t *bf = ackQueue.run;
+	if(bf->sequenceNumber == sequenceNumber){
+		ackQueue.run = bf->next;
+		ackQueue.room++;
+//		Serial.printf("ack buffer processed : %i\n", (uint32_t)bf);
+	}
+}
+
 
 void ar_unpackFrame(uint8_t* data, size_t length){
-	Serial.printf("unpack frame %i : ", *data);
+//	Serial.printf("unpack frame %i : ", *data);
 	length--;
 	switch (*(data++)){
 		case PROJECT_COMMON:
@@ -207,7 +278,7 @@ void ar_unpackFrame(uint8_t* data, size_t length){
 }
 
 void ar_unpackFrameCommon(uint8_t* data, size_t length){
-	Serial.printf("class : %i ", *data);
+//	Serial.printf("class : %i ", *data);
 	length--;
 	switch(*(data++)){
 		case CMN_COMMON_STATE:
@@ -226,11 +297,17 @@ void ar_unpackFrameCommon(uint8_t* data, size_t length){
 }
 
 void ar_unpackFrameMinidrone(uint8_t* data, size_t length){
-	Serial.printf("class : %i ", *data);
+// 	Serial.printf("class : %i ", *data);
 	length--;
 	switch(*(data++)){
 		case MD_PILOTING_STATE:
 			ar_processMinidronePilotingState(data, length);
+			break;
+		case MD_PILOTING_SETTINGS_STATE:
+			ar_processMinidronePilotingSettingsState(data, length);
+			break;
+		case MD_SPEED_SETTINGS_STATE:
+			ar_processMinidroneSpeedSettingsState(data, length);
 			break;
 		default:
 //			Serial.printf("unused class\n");
@@ -285,9 +362,81 @@ void ar_processMinidronePilotingState(uint8_t* data, size_t length){
 			minidroneState.flyingState = (arFlyingState_t)tools_bufferToInt32t(data);
 			Serial.printf("flying state : %i\n", minidroneState.flyingState);
 			break;
+		case 2:
+			minidroneState.alertState = (arAlertState_t)(tools_bufferToInt32t(data));
+			break;
+		case 3:
+			minidroneState.autoTakeOffMode = (bool)(*data);
+			break;
 		case 6:
-			minidroneState.pilotingMode = tools_bufferToInt32t(data);
+			minidroneState.pilotingMode = (arPilotingMode_t)tools_bufferToInt32t(data);
 			Serial.printf("piloting mode : %i\n", minidroneState.pilotingMode);
+			break;
+		default:
+			break;
+	}
+}
+
+void ar_processMinidronePilotingSettingsState(uint8_t* data, size_t length){
+	length -= 2;
+	int16_t command = tools_bufferToUint16t(data, true);
+	data += 2;
+	switch(command){
+		case 0:
+			minidroneState.maxAltitude = tools_bufferToFloat(data, true);
+			tools_bufferToFloat(data, true);
+			tools_bufferToFloat(data, true);
+			break;
+		case 1:
+			minidroneState.maxTilt = tools_bufferToFloat(data, true);
+			tools_bufferToFloat(data, true);
+			tools_bufferToFloat(data, true);
+			Serial.printf("max tilt : %f\n", minidroneState.maxTilt);
+			break;
+		case 2:
+			minidroneState.bankedTurn = *data;
+			break;
+		case 3:
+			minidroneState.maxThrottle = tools_bufferToFloat(data, true);
+			break;
+		case 4:
+			minidroneState.preferredPilotingMode = (arPilotingMode_t)tools_bufferToInt32t(data, true);
+			break;
+		default:
+			break;
+	}
+}
+
+void ar_processMinidroneSpeedSettingsState(uint8_t* data, size_t length){
+	length -= 2;
+	int16_t command = tools_bufferToUint16t(data, true);
+	data += 2;
+	switch(command){
+		case 0:
+		// There are three settings : current vertical speed, min and max.
+		// For now only current is saved.
+		// the two others could be used to map the user input setting (controller potentiometer) to setting range.
+			minidroneState.maxVerticalSpeed = tools_bufferToFloat(data, true);
+			tools_bufferToFloat(data, true);
+			tools_bufferToFloat(data, true);
+			Serial.printf("max vertical speed : %f\n", minidroneState.maxVerticalSpeed);
+
+			break;
+		case 1:
+		// Same here.
+			minidroneState.maxRotationSpeed = tools_bufferToFloat(data, true);
+			tools_bufferToFloat(data, true);
+			tools_bufferToFloat(data, true);
+			Serial.printf("max rotation speed : %f\n", minidroneState.maxRotationSpeed);
+
+			break;
+		case 2:
+		// Wheels. Unused
+			break;
+		case 3:
+			minidroneState.maxHorizontalSpeed = tools_bufferToFloat(data, true);
+			tools_bufferToFloat(data, true);
+			tools_bufferToFloat(data, true);
 			break;
 		default:
 			break;
@@ -346,7 +495,8 @@ void ar_sendTakeOff(){
 // 2/0/2	(non ack)
 // minidrone/piloting/PCMD
 void ar_sendPCMD(int8_t roll, int8_t pitch, int8_t yaw, int8_t gaz, bool rollPitchFlag){
-	if(minidroneState.flyingState != FLYING_STATE_FLYING){
+	if(minidroneState.flyingState != FLYING_STATE_FLYING &&
+		minidroneState.flyingState != FLYING_STATE_HOVERING){
 		return;
 	}
 
@@ -368,7 +518,7 @@ void ar_sendPCMD(int8_t roll, int8_t pitch, int8_t yaw, int8_t gaz, bool rollPit
 // 2/0/3
 // minidrone/piloting/landing
 void ar_sendLanding(){
-	if(minidroneState.flyingState != FLYING_STATE_FLYING){
+	if(minidroneState.flyingState == FLYING_STATE_LANDED){
 		return;
 	}
 
@@ -385,60 +535,166 @@ void ar_sendLanding(){
 // 2/0/4	(low latency)
 // minidrone/piloting/emergency
 void ar_sendEmergency(){
+	const uint8_t length = 4;
+	uint8_t toSend[length];
+	toSend[0] = PROJECT_MINIDRONE;
+	toSend[1] = MD_PILOTING;
+	tools_uint16tToBuffer(4, &toSend[2]);
 
+
+	ar_populateSendBuffer(FRAME_TYPE_LOW_LATENCY, toSend, length);
 }
 
 // 2/0/5
 // minidrone/piloting/autoTakeOffMode
-void ar_sendAutoTakeOffMode(uint8_t autoTakeOffMode){
+void ar_sendAutoTakeOffMode(bool autoTakeOffMode){
+	const uint8_t length = 5;
+	uint8_t toSend[length];
+	toSend[0] = PROJECT_MINIDRONE;
+	toSend[1] = MD_PILOTING;
+	tools_uint16tToBuffer(5, &toSend[2]);
+	toSend[4] = (uint8_t)autoTakeOffMode;
 
+
+	ar_populateSendBuffer(FRAME_TYPE_DATA_WITH_ACK, toSend, length);
 }
 
 // 2/0/8
 // minidrone/piloting/togglePilotingMode
 void ar_sendTogglePilotingMode(){
+	const uint8_t length = 4;
+	uint8_t toSend[length];
+	toSend[0] = PROJECT_MINIDRONE;
+	toSend[1] = MD_PILOTING;
+	tools_uint16tToBuffer(8, &toSend[2]);
 
+
+	ar_populateSendBuffer(FRAME_TYPE_DATA_WITH_ACK, toSend, length);
 }
 
 // 2/8/0
 // minidrone/pilotingSettings/MaxAltitude
 void ar_sendMaxAltitude(float maxAltitude){
+	const uint8_t length = 8;
+	uint8_t toSend[length];
+	toSend[0] = PROJECT_MINIDRONE;
+	toSend[1] = MD_PILOTING_SETTINGS;
+	tools_uint16tToBuffer(0, &toSend[2]);
+	tools_floatToBuffer(maxAltitude, &toSend[4]);
 
+	ar_populateSendBuffer(FRAME_TYPE_DATA_WITH_ACK, toSend, length);
 }
 
 // 2/8/1
 // minidrone/pilotingSettings/maxTilt
 void ar_sendMaxTilt(float maxTilt){
+//	Serial.printf("max tilt : %f\n", maxTilt);
+	const uint8_t length = 8;
+	uint8_t toSend[length];
+	toSend[0] = PROJECT_MINIDRONE;
+	toSend[1] = MD_PILOTING_SETTINGS;
+	tools_uint16tToBuffer(1, &toSend[2]);
+	tools_floatToBuffer(maxTilt, &toSend[4]);
 
+	ar_populateSendBuffer(FRAME_TYPE_DATA_WITH_ACK, toSend, length);
+}
+
+// 2/8/2
+// minidrone/pilotingMode/bankedTurn
+void ar_sendBankedTrun(bool bankedTurn){
+	const uint8_t length = 5;
+	uint8_t toSend[length];
+	toSend[0] = PROJECT_MINIDRONE;
+	toSend[1] = MD_PILOTING_SETTINGS;
+	tools_uint16tToBuffer(2, &toSend[2]);
+	toSend[4] = (uint8_t)bankedTurn;
+
+	ar_populateSendBuffer(FRAME_TYPE_DATA_WITH_ACK, toSend, length);
+}
+
+// 2/8/3
+// minidrone/pilotingMode/maxThrottle
+void ar_sendMaxThrottle(float maxThrottle){
+	const uint8_t length = 8;
+	uint8_t toSend[length];
+	toSend[0] = PROJECT_MINIDRONE;
+	toSend[1] = MD_PILOTING_SETTINGS;
+	tools_uint16tToBuffer(3, &toSend[2]);
+	tools_floatToBuffer(maxThrottle, &toSend[4]);
+
+	ar_populateSendBuffer(FRAME_TYPE_DATA_WITH_ACK, toSend, length);
 }
 
 // 2/8/4
 // minidrone/pilotingSettings/preferredPilotingMode
 void ar_sendPreferredPilotingMode(uint8_t preferredPilotingMode){
+	const uint8_t length = 8;
+	uint8_t toSend[length];
+	toSend[0] = PROJECT_MINIDRONE;
+	toSend[1] = MD_PILOTING_SETTINGS;
+	tools_uint16tToBuffer(4, &toSend[2]);
+	tools_int32tToBuffer((int32_t)preferredPilotingMode, &toSend[4]);
+
+	ar_populateSendBuffer(FRAME_TYPE_DATA_WITH_ACK, toSend, length);
 
 }
 
 // 2/1/0
 // minidrone/speedSettings/maxVerticalSpeed
 void ar_sendMaxVerticalSpeed(float maxVerticalSpeed){
+	const uint8_t length = 8;
+	uint8_t toSend[length];
+	toSend[0] = PROJECT_MINIDRONE;
+	toSend[1] = MD_SPEED_SETTINGS;
+	tools_uint16tToBuffer(0, &toSend[2]);
+	tools_floatToBuffer(maxVerticalSpeed, &toSend[4]);
 
+	ar_populateSendBuffer(FRAME_TYPE_DATA_WITH_ACK, toSend, length);
 }
 
 // 2/1/1
 // minidrone/speedSettings/maxRotationalSpeed
 void ar_sendMaxRotationSpeed(float maxRotationSpeed){
+	const uint8_t length = 8;
+	uint8_t toSend[length];
+	toSend[0] = PROJECT_MINIDRONE;
+	toSend[1] = MD_SPEED_SETTINGS;
+	tools_uint16tToBuffer(1, &toSend[2]);
+	tools_floatToBuffer(maxRotationSpeed, &toSend[4]);
 
+	ar_populateSendBuffer(FRAME_TYPE_DATA_WITH_ACK, toSend, length);
 }
 
 // 2/1/2
 // minidrone/speedSettings/wheels
 void ar_sendWheels(bool wheels){
+	const uint8_t length = 5;
+	uint8_t toSend[length];
+	toSend[0] = PROJECT_MINIDRONE;
+	toSend[1] = MD_SPEED_SETTINGS;
+	tools_uint16tToBuffer(2, &toSend[2]);
+	toSend[4] = wheels;
 
+	ar_populateSendBuffer(FRAME_TYPE_DATA_WITH_ACK, toSend, length);
 }
 
 // 2/1/3
 // minidrone/speedSettings/maxHorizontalSpeed
 void ar_sendMaxHorizontalSpeed(float maxHorizontalSpeed){
+	const uint8_t length = 8;
+	uint8_t toSend[length];
+	toSend[0] = PROJECT_MINIDRONE;
+	toSend[1] = MD_SPEED_SETTINGS;
+	tools_uint16tToBuffer(3, &toSend[2]);
+	tools_floatToBuffer(maxHorizontalSpeed, &toSend[4]);
 
+	ar_populateSendBuffer(FRAME_TYPE_DATA_WITH_ACK, toSend, length);
 }
 
+int16_t _ar_getCommand(uint8_t* data, size_t* length){
+	length -= 2;
+	int16_t command = tools_bufferToUint16t(data, true);
+	data += 2;
+
+	return command;
+}

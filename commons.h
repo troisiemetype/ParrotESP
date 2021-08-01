@@ -15,6 +15,8 @@ struct arBuffer_t{
 	uint8_t sequenceNumber;
 	uint8_t data[18];
 	uint8_t length;
+	uint32_t timestamp;
+	int8_t retry;
 	arBuffer_t* next;
 	arBuffer_t* prev;
 };
