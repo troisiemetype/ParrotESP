@@ -23,17 +23,18 @@
  */
 
 const size_t SEND_BUFFER_SIZE = 32;
+const size_t SEND_WITH_ACK_BUFFER_SIZE = 32;
 const size_t RECEIVE_BUFFER_SIZE = 32;
-const size_t ACK_BUFFER_SIZE = 16;
+
 
 arBuffer_t sendBuffer[SEND_BUFFER_SIZE];
 arBufferQueue_t sendQueue;
 
+arBuffer_t sendWithAckBuffer[SEND_BUFFER_SIZE];
+arBufferQueue_t sendWithAckQueue;
+
 arBuffer_t receiveBuffer[RECEIVE_BUFFER_SIZE];
 arBufferQueue_t receiveQueue;
-
-arBuffer_t ackBuffer[ACK_BUFFER_SIZE];
-arBufferQueue_t ackQueue;
 
 uint8_t sequenceNumberAck = 0;
 uint8_t sequenceNumberCommand = 0;
@@ -49,8 +50,8 @@ void ar_init(){
 
 void ar_initBuffers(){
 	ar_setBuffer(sendBuffer, &sendQueue, SEND_BUFFER_SIZE);
+	ar_setBuffer(sendWithAckBuffer, &sendWithAckQueue, SEND_WITH_ACK_BUFFER_SIZE);
 	ar_setBuffer(receiveBuffer, &receiveQueue, RECEIVE_BUFFER_SIZE);
-	ar_setBuffer(ackBuffer, &ackQueue, ACK_BUFFER_SIZE);
 //	ar_bufferState(&sendQueue, "send");
 //	ar_bufferState(&receiveQueue, "receive");
 //	ar_bufferState(&ackQueue, "ack");
@@ -118,23 +119,34 @@ void ar_populateReceiveBuffer(arFrameType_t frameType, uint8_t* data, uint8_t le
 
 }
 
-// TODO : need to understand why it's populated twice for some commandes !
 void ar_populateSendBuffer(arFrameType_t frameType, uint8_t* data, uint8_t length, uint8_t retry){
-	if(sendQueue.room <= 0) return;
+	bool sendWithAck;
+	arBufferQueue_t *queue;
+
+	if(frameType == FRAME_TYPE_LOW_LATENCY || frameType == FRAME_TYPE_DATA_WITH_ACK){
+		sendWithAck = true;
+		queue = &sendWithAckQueue;
+	} else {
+		sendWithAck = false;
+		queue = &sendQueue;
+	}
+
+	if(queue->room <= 0) return;
 
 //	Serial.println("populating send buffer");
 
 	arBuffer_t *bf;
 
 	if(frameType == FRAME_TYPE_LOW_LATENCY){
-		bf = sendQueue.run->prev;
+		bf = queue->run->prev;
 	} else {
-		bf = sendQueue.write;
+		bf = queue->write;
 	}
 
 	bf->frameType = frameType;
 	bf->length = length;
 	bf->retry = retry;
+	bf->frameStatus = FRAME_STATUS_WAIT_SEND;
 	memcpy(bf->data, data, length);
 
 	switch(frameType){
@@ -153,16 +165,16 @@ void ar_populateSendBuffer(arFrameType_t frameType, uint8_t* data, uint8_t lengt
 	}
 
 	if(frameType == FRAME_TYPE_LOW_LATENCY){
-		sendQueue.run = bf;
+		queue->run = bf;
 	} else {
-		sendQueue.write = bf->next;
+		queue->write = bf->next;
 	}
-	sendQueue.room--;
+	queue->room--;
 
 //	ar_bufferState(&sendQueue, "queued, send");
 //	ar_bufferContent(bf);
 }
-
+/*
 void ar_populateAckBuffer(arBuffer_t* buffer){
 	if(ackQueue.room <= 0) return;
 
@@ -176,7 +188,7 @@ void ar_populateAckBuffer(arBuffer_t* buffer){
 	ackQueue.write = bf->next;
 	ackQueue.room--;
 }
-
+*/
 void ar_checkReceiveBuffer(){
 	if(receiveQueue.room == receiveQueue.size) return;
 	
@@ -192,23 +204,19 @@ void ar_checkReceiveBuffer(){
 			break;
 		case FRAME_TYPE_ACK:
 			ar_processAck(bf->data[0]);
-			receiveQueue.run = bf->next;
-			receiveQueue.room++;
 			break;
 		default:
 			break;
 	}
 
+	receiveQueue.run = bf->next;
+	receiveQueue.room++;
 }
 
 void ar_checkSendBuffer(){
 	if(sendQueue.room == sendQueue.size) return;
 
 	arBuffer_t *bf = sendQueue.run;
-	
-	if(bf->frameType == FRAME_TYPE_LOW_LATENCY || bf->frameType == FRAME_TYPE_DATA_WITH_ACK){
-		ar_populateAckBuffer(bf);
-	}
 
 	ble_sendFrame(bf, bf->length);
 	sendQueue.run = bf->next;
@@ -217,17 +225,40 @@ void ar_checkSendBuffer(){
 //	ar_bufferState(&sendQueue, "processed, send");
 }
 
+void ar_checkSendWithAckBuffer(){
+	if(sendWithAckQueue.room == sendWithAckQueue.size) return;
+
+	uint32_t now = millis();
+
+	arBuffer_t *bf = sendWithAckQueue.run;
+//	Serial.printf("now : %i\t", now);
+//	ar_bufferContent(bf);
+
+	if(bf->frameStatus == FRAME_STATUS_WAIT_SEND){
+		bf->timestamp = now;
+		ble_sendFrame(bf, bf->length);
+		bf->frameStatus = FRAME_STATUS_WAIT_ACK;
+	} else if(bf->frameStatus == FRAME_STATUS_WAIT_ACK){
+		if((now - bf->timestamp) > FRAME_TIMEOUT){
+			if((--bf->retry) > 0){
+				bf->timestamp = now;
+				ble_sendFrame(bf, bf->length);
+				bf->frameStatus = FRAME_STATUS_WAIT_ACK;
+			} else {
+				sendWithAckQueue.run = bf->next;
+				sendWithAckQueue.room++;
+			}
+		}
+	}
+}
+/*
 void ar_checkAckBuffer(){
 	if(ackQueue.room == ackQueue.size) return;
 //	Serial.println("Checking Ack buffer.");
 
 	uint32_t now = millis();
 	arBuffer_t *bf = ackQueue.run;
-/*
-	Serial.printf("now : %i\n", now);
-	Serial.printf("timestamp : %i\n", bf->timestamp);
-	ar_bufferContent(bf);	
-*/
+
 	if((now - bf->timestamp) > FRAME_TIMEOUT){
 //		Serial.printf("timeout %i, re-send buffer %i\n", (now - bf->timestamp), bf->sequenceNumber);
 		if(--bf->retry > 0){
@@ -240,13 +271,14 @@ void ar_checkAckBuffer(){
 	}
 //	ar_bufferState(&ackQueue, "ack");
 }
-
+*/
 void ar_processAck(uint8_t sequenceNumber){
 //	Serial.printf("checking ack id : %i\n", sequenceNumber);
-	arBuffer_t *bf = ackQueue.run;
+	arBuffer_t *bf = sendWithAckQueue.run;
 	if(bf->sequenceNumber == sequenceNumber){
-		ackQueue.run = bf->next;
-		ackQueue.room++;
+		sendWithAckQueue.run = bf->next;
+		sendWithAckQueue.room++;
+		memset(bf, 0, sizeof(arBuffer_t));
 //		Serial.printf("ack buffer processed : %i\n", (uint32_t)bf);
 	}
 }
@@ -271,8 +303,7 @@ void ar_unpackFrame(uint8_t* data, size_t length){
 //			Serial.printf("frame error\n");
 			break;
 	}
-	receiveQueue.run = receiveQueue.run->next;
-	receiveQueue.room++;
+
 
 //	ar_bufferState(&receiveQueue, "processed, receive");
 }
@@ -389,12 +420,14 @@ void ar_processMinidronePilotingSettingsState(uint8_t* data, size_t length){
 			break;
 		case 1:
 			minidroneState.maxTilt = tools_bufferToFloat(data, true);
-			tools_bufferToFloat(data, true);
-			tools_bufferToFloat(data, true);
-			Serial.printf("max tilt : %f\n", minidroneState.maxTilt);
+			
+			Serial.printf("max tilt : %f (min : %f, max %f)\n", minidroneState.maxTilt,
+												tools_bufferToFloat(data, true),
+												tools_bufferToFloat(data, true));
 			break;
 		case 2:
 			minidroneState.bankedTurn = *data;
+			Serial.printf("banked turn : %i\n", minidroneState.bankedTurn);
 			break;
 		case 3:
 			minidroneState.maxThrottle = tools_bufferToFloat(data, true);
@@ -417,17 +450,19 @@ void ar_processMinidroneSpeedSettingsState(uint8_t* data, size_t length){
 		// For now only current is saved.
 		// the two others could be used to map the user input setting (controller potentiometer) to setting range.
 			minidroneState.maxVerticalSpeed = tools_bufferToFloat(data, true);
-			tools_bufferToFloat(data, true);
-			tools_bufferToFloat(data, true);
-			Serial.printf("max vertical speed : %f\n", minidroneState.maxVerticalSpeed);
+			
+			Serial.printf("max vertical speed : %f (min : %f, max %f)\n", minidroneState.maxVerticalSpeed,
+																			tools_bufferToFloat(data, true),
+																			tools_bufferToFloat(data, true));
 
 			break;
 		case 1:
 		// Same here.
 			minidroneState.maxRotationSpeed = tools_bufferToFloat(data, true);
-			tools_bufferToFloat(data, true);
-			tools_bufferToFloat(data, true);
-			Serial.printf("max rotation speed : %f\n", minidroneState.maxRotationSpeed);
+
+			Serial.printf("max rotation speed : %f (min : %f, max %f)\n", minidroneState.maxRotationSpeed,
+																			tools_bufferToFloat(data, true),
+																			tools_bufferToFloat(data, true));
 
 			break;
 		case 2:
@@ -472,7 +507,18 @@ void ar_sendAllSettings(){
 // 2/0/0
 // minidrone/piloting/flattrim
 void ar_sendFlatTrim(){
+	if(minidroneState.flyingState != FLYING_STATE_LANDED){
+		return;
+	}
 
+	const uint8_t length = 4;
+	uint8_t toSend[length];
+	toSend[0] = PROJECT_MINIDRONE;
+	toSend[1] = MD_PILOTING;
+	tools_uint16tToBuffer(0, &toSend[2]);
+
+
+	ar_populateSendBuffer(FRAME_TYPE_DATA_WITH_ACK, toSend, length);		
 }
 
 // 2/0/1
@@ -601,7 +647,7 @@ void ar_sendMaxTilt(float maxTilt){
 
 // 2/8/2
 // minidrone/pilotingMode/bankedTurn
-void ar_sendBankedTrun(bool bankedTurn){
+void ar_sendBankedTurn(bool bankedTurn){
 	const uint8_t length = 5;
 	uint8_t toSend[length];
 	toSend[0] = PROJECT_MINIDRONE;

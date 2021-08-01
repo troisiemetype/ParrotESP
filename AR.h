@@ -140,6 +140,7 @@ void ar_populateAckBuffer(arBuffer_t* buffer);
 
 void ar_checkReceiveBuffer();
 void ar_checkSendBuffer();
+void ar_checkSendWithAckBuffer();
 void ar_checkAckBuffer();
 
 void ar_processAck(uint8_t sequenceNumber);
@@ -171,7 +172,7 @@ void ar_sendTogglePilotingMode();
 
 void ar_sendMaxAltitude(float maxAltitude);
 void ar_sendMaxTilt(float maxTilt);
-void ar_sendBankedTrun(bool bankedTurn);
+void ar_sendBankedTurn(bool bankedTurn);
 void ar_sendMaxThrottle(float maxThrottle);
 void ar_sendPreferredPilotingMode(uint8_t preferredPilotingMode);
 

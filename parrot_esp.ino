@@ -16,6 +16,7 @@ void setup(){
 //	ble_enumerateServices();
 //	ble_askForSettings();
 	ar_sendAllSettings();
+	ar_sendPreferredPilotingMode(2);
 
 	control_init();
 
@@ -29,8 +30,8 @@ void loop(){
 	control_update();
 
 	ar_checkSendBuffer();
+	ar_checkSendWithAckBuffer();
 	ar_checkReceiveBuffer();
-	ar_checkAckBuffer();
 }
 
 

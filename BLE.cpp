@@ -88,12 +88,12 @@ void ble_onReceiveCommandAck(BLERemoteCharacteristic* pBLERemoteCharacteristic, 
 }
 
 void ble_onReceiveAckCommand(BLERemoteCharacteristic* pBLERemoteCharacteristic, uint8_t* data, size_t length, bool isNotify){
-	Serial.printf("%i\t received Ack for command id : %i\n", millis(), data[2]);
+	Serial.printf("%i\treceived Ack for command id : %i\n", millis(), data[2]);
 	ar_populateReceiveBuffer(FRAME_TYPE_ACK, data, length);
 }
 
 void ble_onReceiveAckLowLatency(BLERemoteCharacteristic* pBLERemoteCharacteristic, uint8_t* data, size_t length, bool isNotify){
-	Serial.printf("%i\t received Ack for Low Latency id : %i\n", millis(), data[2]);
+	Serial.printf("%i\treceived Ack for Low Latency id : %i\n", millis(), data[2]);
 	ar_populateReceiveBuffer(FRAME_TYPE_ACK, data, length);
 }
 

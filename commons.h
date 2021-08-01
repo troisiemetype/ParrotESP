@@ -10,6 +10,11 @@ enum arFrameType_t{
 	FRAME_TYPE_DATA_WITH_ACK,
 };
 
+enum arFrameStatus_t{
+	FRAME_STATUS_WAIT_SEND = 0,
+	FRAME_STATUS_WAIT_ACK,
+};
+
 struct arBuffer_t{
 	arFrameType_t frameType;
 	uint8_t sequenceNumber;
@@ -17,6 +22,7 @@ struct arBuffer_t{
 	uint8_t length;
 	uint32_t timestamp;
 	int8_t retry;
+	arFrameStatus_t frameStatus;
 	arBuffer_t* next;
 	arBuffer_t* prev;
 };

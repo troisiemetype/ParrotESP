@@ -3,11 +3,17 @@
 int16_t rawInput[NUM_CHANNELS];
 int16_t AETR[4];
 
-bool goFly = false;
-bool prevGoFly = false;
+bool ch5 = false;
+bool prevCh5 = false;
 
 uint8_t ch6 = 0;
 uint8_t prevCh6 = 0;
+
+uint8_t ch7 = 0;
+uint8_t prevCh7 = 0;
+
+uint8_t ch8 = 0;
+uint8_t prevCh8 = 0;
 
 void control_init(){
 	memset(rawInput, 0, (NUM_CHANNELS * sizeof(int16_t)));
@@ -35,8 +41,8 @@ void control_formatControls(){
 		AETR[i] = map(rawInput[i], -512, 512, -100, 100);
 	}
 
-	prevGoFly = goFly;
-	if(rawInput[4] > 0) goFly = true; else goFly = false;
+	prevCh5 = ch5;
+	if(rawInput[4] > 0) ch5 = true; else ch5 = false;
 
 	prevCh6 = ch6;
 	if(rawInput[5] < -20){
@@ -45,6 +51,20 @@ void control_formatControls(){
 		ch6 = 2;
 	} else {
 		ch6 = 1;
+	}
+
+	prevCh7 = ch7;
+	if(rawInput[6] < -20){
+		ch7 = 0;
+	} else {
+		ch7 = 1;
+	}
+
+	prevCh8 = ch8;
+	if(rawInput[7] < -20){
+		ch8 = 0;
+	} else {
+		ch8 = 1;
 	}
 
 //	Serial.printf("ch 6 : %i\n", ch6);
@@ -62,8 +82,9 @@ void control_sendAETR(){
 
 // Send other channels (non-AETR) to buffers, on change.
 void control_sendControls(){
-	if(goFly != prevGoFly){
-		if(goFly){
+	if(ch5 != prevCh5){
+		if(ch5){
+			ar_sendFlatTrim();
 			ar_sendTakeOff();
 //			Serial.println("send take off");
 		} else {
@@ -98,17 +119,15 @@ void control_sendControls(){
 		}
 	}
 
-/*	if(ch6 != prevCh6){
-		Serial.println("ch6 triggered");
-		if (ch6 == 0){
-			ar_sendMaxTilt(15.0);
-
-		} else if(ch6 == 1){
-			ar_sendMaxTilt(30.0);
-
-		} else if(ch6 == 2);
-			ar_sendMaxTilt(45.0);
+	if(ch7 != prevCh7){
+		ar_sendTogglePilotingMode();
 	}
-	*/
-
+	
+	if(ch8 != prevCh8){
+		if(ch8){
+			ar_sendBankedTurn(true);
+		} else {
+			ar_sendBankedTurn(false);
+		}
+	}
 }
