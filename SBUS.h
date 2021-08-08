@@ -27,28 +27,24 @@
  *		fail safef is also used by the receiver to indicate that this mode has been entered, following several lost frames.
  *		fulle range for servos (0-2047, 11 bits) correspond to extended limits range, -150% - 150% (to be sonfirmed by testing)
  */
-
-#define SBUS_FRAME_LENGTH		25
-#define SBUS_HEADER				0x0F
-#define SBUS_FOOTER				0x00
-//#define SBUS_FOOTER_ALT			0x7C		// need to find why the footer can change on may radio (and also why this footer has 2 bytes less per frame)
-
-#define SBUS_NUM_CHANNELS		16
-
-#define SBUS_NEUTRAL			992				// Why is it not 1024 ? On openTX it's 992.
-
-enum sbusState_t{
-
-};
-
 #include <Arduino.h>
 #include "parrot_esp.h"
+
+#define SBUS_FRAME_LENGTH       25
+#define SBUS_HEADER             0x0F
+#define SBUS_FOOTER             0x00
+//#define SBUS_FOOTER_ALT           0x7C        // need to find why the footer can change on may radio (and also why this footer has 2 bytes less per frame)
+
+#define SBUS_NUM_CHANNELS       18
+#define NUM_CHANNELS            SBUS_NUM_CHANNELS
+
+#define SBUS_NEUTRAL            992             // Why is it not 1024 ? On openTX it's 992.
 
 void sbus_init();
 bool sbus_update();
 
-int16_t* sbus_getChannels();
+controlData_t* sbus_getChannels();
 
-void sbus_processChannels();
+void _sbus_processChannels();
 
 #endif

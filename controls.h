@@ -11,6 +11,8 @@
 #include "SBUS.h"
 #endif
 
+#define CONTROL_NUM_CHANNELS	NUM_CHANNELS
+
 void control_init();
 void control_update();
 void control_formatControls();

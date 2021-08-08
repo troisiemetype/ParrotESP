@@ -1,6 +1,8 @@
 #include "controls.h"
 
-int16_t rawInput[NUM_CHANNELS];
+controlData_t controlData;
+
+int16_t rawInput[CONTROL_NUM_CHANNELS];
 int16_t AETR[4];
 
 bool ch5 = false;
@@ -16,37 +18,64 @@ uint8_t ch8 = 0;
 uint8_t prevCh8 = 0;
 
 void control_init(){
-	memset(rawInput, 0, (NUM_CHANNELS * sizeof(int16_t)));
+	memset(rawInput, 0, (CONTROL_NUM_CHANNELS * sizeof(int16_t)));
+	memset(&controlData, 0, sizeof(controlData_t));
+	controlData.channels = rawInput;
+	controlData.numChannels = CONTROL_NUM_CHANNELS;
+
 #if defined TX_USE_PPM
 	ppm_init();
-	// todo : add throttle safety
+	controlData.resolution = ppm_getChannels()->resolution;
 #elif defined TX_USE_SBUS
 	sbus_init();
+	controlData.resolution = sbus_getChannels()->resolution;
 #endif
 }
 
 void control_update(){
+	bool update = false;
+	controlData_t *data;
+
 #if defined TX_USE_PPM
 	// "rawInput" is pre-foramtted : following the protocol used to decode channels, values are uint16_t, ranging from 0 to 1024.
 	// Each protocol function (PPM, S.bus, etc) should then modify them to have unified values 0-centered.
+
 	if(ppm_update()){
-		memcpy(rawInput, ppm_getChannels(), (NUM_CHANNELS * sizeof(int16_t)));
+		update = true;
+		data = ppm_getChannels();
+	}
+
+#elif defined TX_USE_SBUS
+
+	if(sbus_update()){
+		update = true;
+		data = sbus_getChannels();
+	}
+
+#endif
+
+	if(update){
+		memcpy(rawInput, data->channels, (CONTROL_NUM_CHANNELS * sizeof(int16_t)));
 		control_formatControls();
 		control_sendAETR();
-		control_sendControls();
+		control_sendControls();		
 	}
-#elif defined TX_USE_SBUS
-	if(sbus_update()){
-
+/*
+	for(uint8_t i = 0; i < CONTROL_NUM_CHANNELS; ++i){
+		Serial.printf("%i\t", rawInput[i]);
 	}
-#endif
+	Serial.println();
+*/
 }
 
 void control_formatControls(){
 	// minidrones are taking commands mapped from -100 to 100% as input.
 	for(uint8_t i = 0; i < 4; ++i){
-		AETR[i] = map(rawInput[i], -512, 512, -100, 100);
+		AETR[i] = map(rawInput[i], -controlData.resolution, controlData.resolution, -100, 100);
+//		Serial.printf("%i\t", AETR[i]);
 	}
+
+//	Serial.println();
 
 	prevCh5 = ch5;
 	if(rawInput[4] > 0) ch5 = true; else ch5 = false;

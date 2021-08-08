@@ -2,7 +2,7 @@
 #define PARROT_ESP_SETTINGS_H
 
 
-#define NUM_CHANNELS	8			// max : 8
+// #define NUM_CHANNELS	8			// max : 8
 #define FRAME_TIMEOUT	200			// time before a frame is resent, in milliseconds
 
 // Protocol from TX to esp

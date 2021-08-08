@@ -34,10 +34,14 @@
 
 #include "parrot_esp.h"
 
+#define PPM_NEUTRAL         1500
+#define PPM_NUM_CHANNELS    8
+#define NUM_CHANNELS        PPM_NUM_CHANNELS
+
 void ppm_init();
 bool ppm_update();
 
-int16_t* ppm_getChannels();
-void ppm_isr();
+controlData_t* ppm_getChannels();
+void _ppm_isr();
 
 #endif

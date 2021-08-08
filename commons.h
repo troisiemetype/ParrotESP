@@ -36,4 +36,13 @@ struct arBufferQueue_t{
 	size_t room;
 };
 
+struct controlData_t{
+//	uint8_t RSSI;
+	bool failsafe;
+	bool frameLost;
+	uint16_t numChannels;
+	int16_t *channels;
+	uint16_t resolution;
+};
+
 #endif
