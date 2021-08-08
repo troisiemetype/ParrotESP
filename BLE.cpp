@@ -105,7 +105,10 @@ class ClientCallbacks : public BLEClientCallbacks{
 
 	void onDisconnect(BLEClient* pClient){
 		Serial.println("disconnected !");
-		// todo : try to reconnect !
+		for(uint8_t i = 0; i < 32; ++i){
+			Serial.print("#");
+		}
+		Serial.println();
 		connected = false;
 	}
 };
@@ -130,6 +133,11 @@ class AdvertisedDeviceCallbacks : public BLEAdvertisedDeviceCallbacks{
 void ble_init(){
 	BLEDevice::init("");
 
+	// default power level is P3
+	// See if there is a particular way of setting it, it seems better but not that much.
+	// External antena is probably needed.
+	BLEDevice::setPower(ESP_PWR_LVL_P9);
+
 	pBLEScan = BLEDevice::getScan();
 	pBLEScan->setAdvertisedDeviceCallbacks(new AdvertisedDeviceCallbacks());
 	pBLEScan->setActiveScan(true);
@@ -148,6 +156,7 @@ bool ble_scan(){
 	return connected;
 }
 
+// need to see that again. Maybe it's not needed to re-enumerate all services and characterictics if the connection has laready be made once ?
 void ble_connect(){
 	pClient = BLEDevice::createClient();
 	pClient->setClientCallbacks(new ClientCallbacks());

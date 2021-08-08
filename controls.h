@@ -5,8 +5,10 @@
 
 #include "parrot_esp.h"
 
-#ifdef TX_USE_PPM
+#if defined TX_USE_PPM
 #include "PPM.h"
+#elif defined TX_USE_SBUS
+#include "SBUS.h"
 #endif
 
 void control_init();

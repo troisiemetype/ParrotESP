@@ -1,7 +1,7 @@
 #include "PPM.h"
 
 hw_timer_t *ppmTimer = NULL;
-uint16_t rawChannel[NUM_CHANNELS];
+uint16_t ppmRawChannel[NUM_CHANNELS];
 int16_t channel[NUM_CHANNELS];
 uint8_t curChan = 0;
 volatile bool ppmData = false;
@@ -23,7 +23,7 @@ bool ppm_update(){
 
 	for(uint8_t i = 0; i < NUM_CHANNELS; ++i){
 		portENTER_CRITICAL_ISR(&ppmMux);
-		channel[i] = rawChannel[i] - 1500;
+		channel[i] = ppmRawChannel[i] - 1500;
 		portEXIT_CRITICAL_ISR(&ppmMux);
 	}
 /*
@@ -48,7 +48,7 @@ void IRAM_ATTR ppm_isr(){
 		ppmData = true;
 	} else {
 		portENTER_CRITICAL_ISR(&ppmMux);
-		rawChannel[curChan] = (uint16_t)time;
+		ppmRawChannel[curChan] = (uint16_t)time;
 		portEXIT_CRITICAL_ISR(&ppmMux);
 		if(++curChan >= NUM_CHANNELS){
 			curChan--;

@@ -44,14 +44,14 @@ struct minidroneState_t{
 	bool autoTakeOffMode;								// 2/3/3 		minidrone/PilotingState/AutoTakeOffModeChanged
 	arPilotingMode_t pilotingMode;						// 2/3/6 		minidrone/PilotingState/pilotingModeChanged		// See also PreferredPilotingMode
 
-	float maxAltitude; 									// 2/8/0 		minidrone/PilotingSettings/MaxAltitude 		Min : 2m
-	float maxTilt; 										// 2/8/1 		minidrone/PilotingSettings/MaxTilt 			Default : 15°
+	float maxAltitude; 									// 2/8/0 		minidrone/PilotingSettings/MaxAltitude 		min : 2m, max : 10m
+	float maxTilt; 										// 2/8/1 		minidrone/PilotingSettings/MaxTilt 			Default : 15° min : 5°, max : 25°
 	bool bankedTurn;									// 2/8/2 		minidrone/PilotingSettings/BankedTurn
 	float maxThrottle;									// 2/8/3 		minidrone/PilotingSettings/MaxThrottle 		between 0 and 1
 	arPilotingMode_t preferredPilotingMode;				// 2/8/4 		minidrone/PilotingSettings/PreferredPilotingMode
 
-	float maxVerticalSpeed; 							// 2/1/0 		minidrone/SpeedSettings/MaxVerticalSpeed 	Default : 0.7m/s
-	float maxRotationSpeed; 							// 2/1/1 		minidrone/SpeedSettings/MaxRotationSpeed 	Default : 185°/s
+	float maxVerticalSpeed; 							// 2/1/0 		minidrone/SpeedSettings/MaxVerticalSpeed 	Default : 0.7m/s, min : 0.5, max : 2.0
+	float maxRotationSpeed; 							// 2/1/1 		minidrone/SpeedSettings/MaxRotationSpeed 	Default : 185°/s, min : 50, max : 360
 	float maxHorizontalSpeed; 							// 2/1/3 		minidrone/SpeedSettings/MaxHorizontalSpeed  ony used when maxTilt is not used.
 	// todo : use Navigation data state ?				// 2/18/x
 	// piloting settings state
@@ -182,6 +182,5 @@ void ar_sendWheels(bool wheels);
 void ar_sendMaxHorizontalSpeed(float maxHorizontalSpeed);
 
 int16_t _ar_getCommand(uint8_t* data, size_t* length);
-
 
 #endif

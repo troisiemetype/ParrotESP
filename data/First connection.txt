@@ -1,8 +1,3 @@
-Advertised Device: Name: , Address: 3c:bd:3e:fc:5d:2c, serviceUUID: cbbfe0e1-f7f3-4206-84e0-84cbb3d09dfc 
-Advertised Device: Name: , Address: cb:6d:01:2c:90:9b, manufacturer data: 590001ffffffff, serviceUUID: 45839c65-9f4d-6a5f-2a43-a45b9532aab1 
-Advertised Device: Name: , Address: 7e:24:09:be:04:fd, manufacturer data: e0000103ca9aa87e, serviceUUID: 0000fe9f-0000-1000-8000-00805f9b34fb 
-[  5708][W][BLEScan.cpp:75] handleGAPEvent(): ESP_GAP_SEARCH_INQ_CMPL_EVT
-Advertised Device: Name: , Address: 7e:24:09:be:04:fd, manufacturer data: e0000103ca9aa87e, serviceUUID: 0000fe9f-0000-1000-8000-00805f9b34fb 
 Advertised Device: Name: RS_W272954, Address: a0:14:3d:68:51:ba, manufacturer data: 4300cf1900090100 
 [  7462][I][BLEDevice.cpp:622] addPeerDevice(): add conn_id: 0, GATT role: client
 connected to a0:14:3d:68:51:ba

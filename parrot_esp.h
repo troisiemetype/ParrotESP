@@ -7,6 +7,7 @@
 #include "settings.h"
 #include "commons.h"
 #include "tools.h"
+#include "SD.h"
 
 #include "BLE.h"
 #include "AR.h"

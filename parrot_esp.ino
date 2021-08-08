@@ -3,7 +3,7 @@
 void setup(){
 	Serial.begin(115200);
 //	testConvertTools();
-
+/*
 	ar_init();
 
 	ble_init();
@@ -17,21 +17,22 @@ void setup(){
 //	ble_askForSettings();
 	ar_sendAllSettings();
 	ar_sendPreferredPilotingMode(2);
-
+*/
 	control_init();
 
 }
 
 void loop(){
-	if(!ble_checkConnection()){
+/*	if(!ble_checkConnection()){
 		ble_connect();
 		return;
 	}
-	control_update();
-
+*/	control_update();
+/*
 	ar_checkSendBuffer();
 	ar_checkSendWithAckBuffer();
 	ar_checkReceiveBuffer();
+*/
 }
 
 

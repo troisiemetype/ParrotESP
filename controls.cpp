@@ -17,26 +17,33 @@ uint8_t prevCh8 = 0;
 
 void control_init(){
 	memset(rawInput, 0, (NUM_CHANNELS * sizeof(int16_t)));
-#ifdef TX_USE_PPM
+#if defined TX_USE_PPM
 	ppm_init();
 	// todo : add throttle safety
-#else
+#elif defined TX_USE_SBUS
+	sbus_init();
 #endif
 }
 
 void control_update(){
-#ifdef TX_USE_PPM
+#if defined TX_USE_PPM
+	// "rawInput" is pre-foramtted : following the protocol used to decode channels, values are uint16_t, ranging from 0 to 1024.
+	// Each protocol function (PPM, S.bus, etc) should then modify them to have unified values 0-centered.
 	if(ppm_update()){
 		memcpy(rawInput, ppm_getChannels(), (NUM_CHANNELS * sizeof(int16_t)));
 		control_formatControls();
 		control_sendAETR();
 		control_sendControls();
 	}
-#else
+#elif defined TX_USE_SBUS
+	if(sbus_update()){
+
+	}
 #endif
 }
 
 void control_formatControls(){
+	// minidrones are taking commands mapped from -100 to 100% as input.
 	for(uint8_t i = 0; i < 4; ++i){
 		AETR[i] = map(rawInput[i], -512, 512, -100, 100);
 	}
@@ -96,25 +103,21 @@ void control_sendControls(){
 	if(ch6 != prevCh6){
 //		Serial.println("ch6 triggered");
 		switch(ch6){
-			case 0:
-				ar_sendMaxTilt(15);
-				ar_sendMaxVerticalSpeed(0.7);
-				ar_sendMaxRotationSpeed(180);
-				break;
 			case 1:
-				ar_sendMaxTilt(30);
-				ar_sendMaxVerticalSpeed(1.4);
-				ar_sendMaxRotationSpeed(360);
+				ar_sendMaxTilt(20);
+				ar_sendMaxVerticalSpeed(1.2);
+				ar_sendMaxRotationSpeed(180);
 				break;
 			case 2:
-				ar_sendMaxTilt(45);
-				ar_sendMaxVerticalSpeed(2.1);
-				ar_sendMaxRotationSpeed(540);
+				ar_sendMaxTilt(25);
+				ar_sendMaxVerticalSpeed(2.0);
+				ar_sendMaxRotationSpeed(360);
 				break;
+			case 0:
 			default:
-				ar_sendMaxTilt(15);
-				ar_sendMaxVerticalSpeed(0.7);
-				ar_sendMaxRotationSpeed(180);
+				ar_sendMaxTilt(10);
+				ar_sendMaxVerticalSpeed(0.6);
+				ar_sendMaxRotationSpeed(120);
 				break;
 		}
 	}
