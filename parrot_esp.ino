@@ -20,6 +20,7 @@ void setup(){
 
 	control_init();
 
+	telemetry_init();
 }
 
 void loop(){
@@ -33,6 +34,7 @@ void loop(){
 	ar_checkSendWithAckBuffer();
 	ar_checkReceiveBuffer();
 
+	telemetry_update();
 }
 
 

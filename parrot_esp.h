@@ -13,5 +13,6 @@
 #include "AR.h"
 
 #include "controls.h"
+#include "telemetry.h"
 
 #endif

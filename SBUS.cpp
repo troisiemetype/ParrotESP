@@ -16,6 +16,7 @@ void sbus_init(){
 	// note : Serial (for transmitting to USB-serial chip on dev boards) uses uart 0.
 	// thus S.bus should use uart 1 or 2.
 //	void HardwareSerial::begin(unsigned long baud, uint32_t config=SERIAL_8N1, int8_t rxPin=-1, int8_t txPin=-1, bool invert=false, unsigned long timeout_ms = 20000UL, uint8_t rxfifo_full_thrhd = 112);
+	// todo : only RX pin is implemented ; see if there is a something like a "parking pin" on the esp.
 	sBus.begin(100000, SERIAL_8E2, PIN_SBUS_INPUT, -1, true);
 
 	memset(&sbusData, 0, sizeof(sbusData));
