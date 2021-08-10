@@ -75,6 +75,8 @@ void ar_initBuffers(){
 //	ar_bufferState(&ackQueue, "ack");
 }
 
+// Initialize a buffer queue, given the array and queue adress, and size of the buffer.
+// Todo : esp idf has a system of queue implemented, maybe it could replace those buffers.
 void ar_setBuffer(arBuffer_t* buffer, arBufferQueue_t* queue, size_t size){
 	memset(buffer, 0, sizeof(arBuffer_t) * size);
 
@@ -95,11 +97,13 @@ void ar_setBuffer(arBuffer_t* buffer, arBufferQueue_t* queue, size_t size){
 	queue->room = size;
 }
 
+// commodity funtion to send to Serial the current state of a buffer queue
 void ar_bufferState(arBufferQueue_t* queue, char* name, bool displayBuffer){
 	Serial.printf("%s buffer ; used :  %i/%i\n", name, (queue->size - queue->room), queue->size);
 	if(displayBuffer) ar_bufferContent(queue->write);
 }
 
+// commodity function to send to Serial the current content of a given buffer.
 void ar_bufferContent(arBuffer_t* buffer){
 	Serial.printf("buffer at address %i\n", (int32_t)buffer);
 	Serial.printf("\tframe type : %i\n", buffer->frameType);
@@ -114,7 +118,8 @@ void ar_bufferContent(arBuffer_t* buffer){
 	Serial.println();
 }
 
-
+// Called by the BLE ISR on receive of new data.
+// TODO : see what to do when buffer is full.
 void ar_populateReceiveBuffer(arFrameType_t frameType, uint8_t* data, uint8_t length){
 	if(receiveQueue.room <= 0) return;
 
@@ -137,10 +142,13 @@ void ar_populateReceiveBuffer(arFrameType_t frameType, uint8_t* data, uint8_t le
 
 }
 
+// Called by the ar_sendFunctions()
+// TODO : implement something in case of full buffer.
 void ar_populateSendBuffer(arFrameType_t frameType, uint8_t* data, uint8_t length, uint8_t retry){
 	bool sendWithAck;
 	arBufferQueue_t *queue;
 
+	// Some kind of data require an ack from the drone, other don't.
 	if(frameType == FRAME_TYPE_LOW_LATENCY || frameType == FRAME_TYPE_DATA_WITH_ACK){
 		sendWithAck = true;
 		queue = &sendWithAckQueue;
@@ -149,12 +157,15 @@ void ar_populateSendBuffer(arFrameType_t frameType, uint8_t* data, uint8_t lengt
 		queue = &sendQueue;
 	}
 
+	// Fails silently on buffer full. Here something should be implemented.
 	if(queue->room <= 0) return;
 
 //	Serial.println("populating send buffer");
 
 	arBuffer_t *bf;
 
+	// Low latency (high priority) frames (i.e. emergency cutout) is added at the RUN end of the buffer.
+	// Other frame types are queued normally.
 	if(frameType == FRAME_TYPE_LOW_LATENCY){
 		bf = queue->run->prev;
 	} else {
@@ -167,6 +178,7 @@ void ar_populateSendBuffer(arFrameType_t frameType, uint8_t* data, uint8_t lengt
 	bf->frameStatus = FRAME_STATUS_WAIT_SEND;
 	memcpy(bf->data, data, length);
 
+	// Each type of frame have its own sequence number.
 	switch(frameType){
 		case FRAME_TYPE_ACK:
 			bf->sequenceNumber = sequenceNumberAck++;
@@ -207,6 +219,8 @@ void ar_populateAckBuffer(arBuffer_t* buffer){
 	ackQueue.room--;
 }
 */
+
+// Called in main loop. Check if new data has been received from the drone.
 void ar_checkReceiveBuffer(){
 	if(receiveQueue.room == receiveQueue.size) return;
 	
@@ -214,13 +228,16 @@ void ar_checkReceiveBuffer(){
 
 	switch(bf->frameType){
 		case FRAME_TYPE_DATA:
+			// Send received data to parser.
 			ar_unpackFrame(bf->data, bf->length);
 			break;
 		case FRAME_TYPE_DATA_WITH_ACK:
+			// Queue an ack from this frame for sending, then send to parser.
 			ar_populateSendBuffer(FRAME_TYPE_ACK, &(bf->sequenceNumber), 1);
 			ar_unpackFrame(bf->data, bf->length);
 			break;
 		case FRAME_TYPE_ACK:
+			// Check if the ack received corresponds to a sent command
 			ar_processAck(bf->data[0]);
 			break;
 		default:
@@ -231,6 +248,7 @@ void ar_checkReceiveBuffer(){
 	receiveQueue.room++;
 }
 
+// Called by the main loop. Check if there are non-ack frame to be sent.
 void ar_checkSendBuffer(){
 	if(sendQueue.room == sendQueue.size) return;
 
@@ -243,6 +261,7 @@ void ar_checkSendBuffer(){
 //	ar_bufferState(&sendQueue, "processed, send");
 }
 
+// Called by the main loop. Check if there are frame with ack in the sending buffer, if they have been sent, or if they need to be sent again.
 void ar_checkSendWithAckBuffer(){
 	if(sendWithAckQueue.room == sendWithAckQueue.size) return;
 
@@ -253,10 +272,12 @@ void ar_checkSendWithAckBuffer(){
 //	ar_bufferContent(bf);
 
 	if(bf->frameStatus == FRAME_STATUS_WAIT_SEND){
+		// Pass the current buffer to the BLE handler
 		bf->timestamp = now;
 		ble_sendFrame(bf, bf->length);
 		bf->frameStatus = FRAME_STATUS_WAIT_ACK;
 	} else if(bf->frameStatus == FRAME_STATUS_WAIT_ACK){
+		// If timeout, resent the frame, or delete it if it's been sent more than default number of retries (which is 5).
 		if((now - bf->timestamp) > FRAME_TIMEOUT){
 			if((--bf->retry) > 0){
 				bf->timestamp = now;
@@ -290,6 +311,8 @@ void ar_checkAckBuffer(){
 //	ar_bufferState(&ackQueue, "ack");
 }
 */
+
+// Check received ack, free buffer accordingly.
 void ar_processAck(uint8_t sequenceNumber){
 //	Serial.printf("checking ack id : %i\n", sequenceNumber);
 	arBuffer_t *bf = sendWithAckQueue.run;
@@ -301,7 +324,7 @@ void ar_processAck(uint8_t sequenceNumber){
 	}
 }
 
-
+// Parse received frame, dispatch to each project class handler.
 void ar_unpackFrame(uint8_t* data, size_t length){
 //	Serial.printf("unpack frame %i : ", *data);
 	length--;
@@ -326,6 +349,7 @@ void ar_unpackFrame(uint8_t* data, size_t length){
 //	ar_bufferState(&receiveQueue, "processed, receive");
 }
 
+// Parse (project) cCmmon, dispatch to function handlers.
 void ar_unpackFrameCommon(uint8_t* data, size_t length){
 //	Serial.printf("class : %i ", *data);
 	length--;
@@ -345,6 +369,7 @@ void ar_unpackFrameCommon(uint8_t* data, size_t length){
 	Serial.println();
 }
 
+// Parse (project) Minidrone, dispatch to function handlers.
 void ar_unpackFrameMinidrone(uint8_t* data, size_t length){
 // 	Serial.printf("class : %i ", *data);
 	length--;
@@ -373,15 +398,15 @@ void ar_processCommonCommonState(uint8_t* data, size_t length){
 	switch(command){
 		case 1:
 			minidroneState.battery = *data;
-			Serial.printf("battery : %i\n", minidroneState.battery);
+//			Serial.printf("battery : %i\n", minidroneState.battery);
 			break;
 		case 7:
 			minidroneState.rssi = tools_bufferToInt16t(data);
-			Serial.printf("RSSI : %i\n", minidroneState.rssi);
+//			Serial.printf("RSSI : %i\n", minidroneState.rssi);
 			break;
-		case 16:
+		case 16:																			// Not sure if this one is implemented on BLE drones.
 			minidroneState.linkSignalQuality = *data;
-			Serial.printf("link signal quality : %i\n", minidroneState.linkSignalQuality);
+//			Serial.printf("link signal quality : %i\n", minidroneState.linkSignalQuality);
 			break;
 		default:
 			break;

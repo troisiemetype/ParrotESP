@@ -26,6 +26,18 @@
 
 #include "parrot_esp.h"
 
+/*
+ *  BLE
+ *
+ *  This part of the program handles bluetooth LE.
+ *
+ *  Start of bluetooth, scan for Minidrones (servers) around, connection, enumeration of services and characteristics, receive ISR and send function.
+ *  UUID of used services and characteristics are set in the BLE.cpp file. Not all sevices and characteristics are used, in fact a lot are not.
+ *  Only a few of them are used for controlling the drone, I don't know if the other are documented somewhere !
+ *  A list of all services and all their caracteristics can be printed by calling ble_enumerateServices() once the connexion is done.
+ *  There is a file in the data folder that lists those services and characteristics on my rolling spider updated with last sofware available.
+ */
+
 void ble_onReceiveCommand(BLERemoteCharacteristic* pBLERemoteCharacteristic, uint8_t* data, size_t length, bool isNotify);
 void ble_onReceiveCommandAck(BLERemoteCharacteristic* pBLERemoteCharacteristic, uint8_t* data, size_t length, bool isNotify);
 void ble_onReceiveAckCommand(BLERemoteCharacteristic* pBLERemoteCharacteristic, uint8_t* data, size_t length, bool isNotify);

@@ -33,4 +33,17 @@
 #include "controls.h"
 #include "telemetry.h"
 
+/*
+ *
+ *  Parrot ESP
+ *
+ *  This software is a partial implementation of the Parrot AR SDK on the esp 32, craft to be run on a board plugged in the JR module bay of an RC transmitter
+ *  It only BLE-based protocol, i.e. the minidrones (rolling spider, cargo, Mambo)
+ *
+ *  The program is articulated into several subprograms (*.cpp / *.h pairs), each responsible of a specific task.
+ *  Some of them are subdivided into hardware specific implementations.
+ *
+ *  Each *.h file contains a description of what its role is.
+ */
+
 #endif

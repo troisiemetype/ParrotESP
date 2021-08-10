@@ -5,6 +5,12 @@
 
 #include "parrot_esp.h"
 
+/*
+ *	Some commodity tools needed here and there. Buffer byte formatting for now.
+ *
+ *  TODO: incrementing the buffer from within the tool doesn't seem to work, it should be supressed.
+ */
+
 void tools_int16tToBuffer(int16_t value, uint8_t* buffer, bool incBuffer = false);
 void tools_uint16tToBuffer(uint16_t value, uint8_t* buffer, bool incBuffer = false);
 

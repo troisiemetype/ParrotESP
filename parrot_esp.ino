@@ -19,35 +19,49 @@
 #include "parrot_esp.h"
 
 void setup(){
+	// Use for "debug" purpose only.
+	// Part of the debug informations use the log library made avaiable by the esp ide. Set debug level when compiling.
 	Serial.begin(115200);
 //	testConvertTools();
 
+	// Init the commands buffers for communication flow with Minidrone	
 	ar_init();
 
+	// Init the BLE layer, then scan BLE servers around. (note : Minidrones are servers, the controller is a client connecting to it)
 	ble_init();
 	for(;;){
 		if(ble_scan()) break;
 		delay(100);
 	}
 
+	// Initialize connexion. Connects to found device, then enumerate services and characteristics needed.
 	ble_firstConnect();
 //	ble_enumerateServices();
 //	ble_askForSettings();
+
+	// Once connexion is done, Minidrone is asked to enumerate its current settings, before it can accept any command.
 	ar_sendAllSettings();
+	// Optionnal
 	ar_sendPreferredPilotingMode(2);
 
+	// Control from receiver initialisation
 	control_init();
 
+	// Telemetry initialisation.
 	telemetry_init();
 }
 
 void loop(){
+	// Check that connexion is sitll alive, or try to reconnect. Not really tried yet.
 	if(!ble_checkConnection()){
 		ble_connect();
 		return;
 	}
+
+	// check for new controls from trasmitter.
 	control_update();
 
+	// Check communication buffers.
 	ar_checkSendBuffer();
 	ar_checkSendWithAckBuffer();
 	ar_checkReceiveBuffer();
@@ -58,7 +72,7 @@ void loop(){
 }
 
 
-
+// Developpement only.
 void testConvertTools(){
 	uint8_t table[] = {0x00, 0x12, 0xCD, 0xFF};
 

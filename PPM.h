@@ -24,15 +24,22 @@
 #endif
 */
 
+#ifndef PARROT_ESP_PPM_H
+#define PARRTO_ESP_PPM_H
+
+#include <Arduino.h>
+
+#include "parrot_esp.h"
+
 /*
  * PPM driver.
  * PPM is a quite simple protocol, inherited from the first RC systems, and still widely used.
  * The principle is quite simple :
- * 			channels are transmitted in a row on a single line, using impulsions.
- *			channel value is the duration between to consequent pulses.
- *			a neutral is a duration of length 1,5ms, min is around 0,9ms, max is around 2,1ms.
- *			when all channels have been transmitted, the line stays low until the next frame.
- *			this padding is used to detect a frame end, and subsequently the start of the next one
+ *          channels are transmitted in a row on a single line, using impulsions.
+ *          channel value is the duration between to consequent pulses.
+ *          a neutral is a duration of length 1,5ms, min is around 0,9ms, max is around 2,1ms.
+ *          when all channels have been transmitted, the line stays low until the next frame.
+ *          this padding is used to detect a frame end, and subsequently the start of the next one
  *
  * ch1------ch2------ch3--ch4----------ch5-----ch6------ch7--ch8----padding----------------
  * |________|________|____|____________|_______|________|____|______|______________________
@@ -44,13 +51,6 @@
  *
  * Note : since analog servos still use this protocol to control their position, neutral length may need to be adjusted.
  */
-
-#ifndef PARROT_ESP_PPM_H
-#define PARRTO_ESP_PPM_H
-
-#include <Arduino.h>
-
-#include "parrot_esp.h"
 
 #define PPM_NEUTRAL         1500
 #define PPM_NUM_CHANNELS    8

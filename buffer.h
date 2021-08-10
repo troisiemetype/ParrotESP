@@ -20,6 +20,13 @@
 #define PARROT_ESP_BUFFER_H
 
 #include <Arduino.h>
+
+/*
+ *	I believe this file is not used anymore, buffers are implemented directly when needed.
+ */
+
+// Note : template classes can be defined in two *.cpp + *.h files as usuall, the delacarations and definitions have to be in the same file !
+
 /*
 template <class T>
 class CBuffer{

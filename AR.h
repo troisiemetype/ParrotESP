@@ -23,6 +23,70 @@
 
 #include "parrot_esp.h"
 
+/*
+ *	Parrot-esp - AR
+ *
+ *	AR is the partial implementation of what Parrot has made available in their sdk, specificly the commands used for communication and control
+ *
+ *	This part of the program is responsible of creation and management of the communication buffers.
+ *	There are enums that reflects the control maps of the SDK, that are used to simplify the writing of new functions
+ *	There are also functions that are entry points for sending and reading commands / controls and acknowledgement to and from the drone.
+ *
+ *	The workflow is organised this way : 
+ *		For sending commands / controls, an ar_sendXxx() functions is called from whatever other part of the program.
+ *		This function formats the command accordingly, then send it to one of the several buffers used.
+ *		Once the buffer has been populated, the ar_checkSendXxxBuffer() will pass this buffer to to the BLE handler, that will send it.
+ *
+ *		For receiving commands, the BLE handlers will populate the appropriate buffer.
+ *		Then the ar_checkReceiveBuffer() function will dispatch it to the parsers, which will eventually set the state structs accordingly.
+ *		Or will drop the value into oblivion if it's not implemented or if we don't care.
+ *
+ *
+ *	The control and commands frames are 20 bytes long at most (BLE limitation), and are formatted like this :
+ *		Data type
+ *		Sequence number
+ *		Actual data
+ *
+ *	Data type can be of for types, each of having it's own BLE characteristic to be sent to:
+ *		(1) Ack 				Acknowledgement of previously received data
+ *		(2) Data 				Data with no acknowledgement requested (PCMD commands and a few others)
+ *		(3) Low latency data 	Data that should have higher priority. (emergency cutoff). This kind of data is pushed at the TAIL of the send buffer.
+ *		(4) Data with ack 		Data requesting an ack.
+ *
+ *		Note on data and acks. A first implementations of buffers in this software sent all commands in buffers, and processed acks as they came.
+ *		That didn't work, the minidrones want to have sent their ack for each data before receiving a new one. So the behavior has been changed.
+ *
+ *	Sequence number is a counter that increments at each new send. Each type of data has it's own. Received sequence number is used when sending ack.
+ *
+ *	The actual data is formated as follow :
+ *		(1 byte)		Project ID 					For minidrones, it's common (0) or minidrone (2)
+ *		(1 byte) 		Class ID in the project
+ *		(2 bytes)		Command ID in the class
+ *		(<=14 bytes)	Data to be sent /received
+ *
+ *	The data can be signed or unsigned 1, 2, 4 ot 8 bytes int, float or double, null terminated string or enum (treated as 4 bytes).
+ *	tools.cpp / .h have functions available to populate and read buffers.
+ *
+ *	Ach to reveceive data must be sent within 150ms (dixit SDK), but my Rolling Spider rarely answers that fast, so it has been set to 200ms.
+ *	The SDK sends PCMD (Piloting CoMmanDs) every 50ms (can't remeber where I read this).
+ *	They can be sent more often, but they tend to stack if bellow 20-25ms. Set it on your transmitter if available.
+ *
+ *	Data that has not been ack whould be resent :
+ *		Common data will be sent again up to 4 times.
+ *		Low Latency (i.e. high priority, both terms are used by the SDK and other sources, and in this software too) should be sent while not acked to.
+ *		PCMD commands are not acked, and a new comand should replace on older that is in buffer and not sent yet. To be implemented.
+ *
+ *	For more informations about the AR protocol, see this document : https://developer.parrot.com/docs/bebop/ARSDK_Protocols.pdf
+ *	You may also look at this github repository, listing all the commands for the AR drones : https://github.com/Parrot-Developers/arsdk-xml/tree/master/xml
+ *	You can also have a look at other Parrot's repository on github, there are other informations available.
+ *	The parrot developper forum has some valuable informations too : https://forum.developer.parrot.com/c/drone-sdk/6
+ *	Lastly, there are other projects aroud nAR drones. This one helped me : https://github.com/amymcgovern/pyparrot
+ */
+
+/*
+ *	The buffers structure needing to be known by other parts of the program, they are defined in common.h, along with frame types and status.
+ */
+
 enum arFlyingState_t{
 	FLYING_STATE_LANDED,
 	FLYING_STATE_TAKINGOFF,
@@ -145,6 +209,8 @@ enum{
 	MD_REMOTE_CONTROLLER_STATE,
 } ar_minidroneClasses;
 
+// TODO : make enum for each command in each class in each project ?
+
 void ar_init();
 void ar_initBuffers();
 void ar_setBuffer(arBuffer_t* buffer, arBufferQueue_t* queue, size_t size);
@@ -164,9 +230,7 @@ void ar_checkAckBuffer();
 void ar_processAck(uint8_t sequenceNumber);
 
 void ar_unpackFrame(uint8_t* data, size_t length);
-
 void ar_unpackFrameCommon(uint8_t* data, size_t length);
-
 void ar_unpackFrameMinidrone(uint8_t* data, size_t length);
 
 void ar_processCommonCommonState(uint8_t* data, size_t length);

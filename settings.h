@@ -19,6 +19,14 @@
 #ifndef PARROT_ESP_SETTINGS_H
 #define PARROT_ESP_SETTINGS_H
 
+/*
+ *  Here should be set all the settings that a user may want to modify :
+ *      Pinouts
+ *      Protocol used for controls inputs from transmitter
+ *      Protcols used for (hopefully !) telemetry
+ *      and so on.
+ */
+
 
 // #define NUM_CHANNELS	8			// max : 8
 #define FRAME_TIMEOUT	200			// time before a frame is resent, in milliseconds

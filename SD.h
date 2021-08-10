@@ -22,6 +22,10 @@
 #include <Arduino.h>
 #include "parrot_esp.h"
 
+/*
+ *  Nothing implemented here yet. It would be nice to have logs on SD card for debugging purposes. To be done.
+ */
+
 void sd_init();
 void sd_startLog();
 void sd_endLog();

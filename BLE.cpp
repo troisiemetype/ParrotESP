@@ -209,7 +209,9 @@ bool ble_checkConnection(){
 	return bleConnected;
 }
 
-
+// It seems that some people had to process this handshake before the drone take any control.
+// On my Rolling Spider it's not needed, but I thought it would be before I found out that it didn't took of because of a buffer problem.
+// See notes at the beginning of AR.cpp for more information about this handshake.
 void ble_shakeHands(){
 	uint8_t toSend[] = {0, 1, 0, 0};
 /*

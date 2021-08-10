@@ -23,6 +23,24 @@
 
 #include "parrot_esp.h"
 
+/*
+ *  Controls
+ *
+ *  This is the entry point to read controls from the transmitter the module is plugged to.
+ *  There are mainly two functions, control_init() and control_update(), that are called during init and program run, respectively.
+ *  Those functions bridge between the hardware-dedicated functions, like PPM or S.bus, and the AR_ functions that sends commands to the drone.
+ *  Other functions chould only be used internally (_prepended)
+ *
+ *  Hardware drivers should implement three functions that are called by control_xxx :
+ *      void xxx_init()
+ *      bool xxx_update()                       that should return 1 if new data has been received. It returns 1 only once.
+ *      controlData_t * xxx_getChannels()       that returns a pointer to a struct holding the data for each channels, as well as some other informations.
+ *                                              Note : this struct may evolve again.
+ */
+
+// Only one input protocol (from transmitter) should be #defined in the settings.h file.
+// TODO : implement a preprocessor guard for multiple definitions.
+
 #if defined TX_USE_PPM
 #include "PPM.h"
 #elif defined TX_USE_SBUS
@@ -33,8 +51,8 @@
 
 void control_init();
 void control_update();
-void control_formatControls();
-void control_sendAETR();
-void control_sendControls();
+void _control_formatControls();
+void _control_sendAETR();
+void _control_sendControls();
 
 #endif

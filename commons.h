@@ -21,6 +21,12 @@
 
 #include <Arduino.h>
 
+/*
+ *	Commons
+ *
+ *	In this file are declared all the specific data types that are shared and need to be known by several parts of the program.
+ */
+
 enum arFrameType_t{
 	FRAME_TYPE_ACK = 1,
 	FRAME_TYPE_DATA,

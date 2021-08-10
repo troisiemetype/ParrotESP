@@ -74,9 +74,9 @@ void control_update(){
 
 	if(update){
 		memcpy(rawInput, data->channels, (CONTROL_NUM_CHANNELS * sizeof(int16_t)));
-		control_formatControls();
-		control_sendAETR();
-		control_sendControls();		
+		_control_formatControls();
+		_control_sendAETR();
+		_control_sendControls();		
 	}
 /*
 	for(uint8_t i = 0; i < CONTROL_NUM_CHANNELS; ++i){
@@ -86,7 +86,7 @@ void control_update(){
 */
 }
 
-void control_formatControls(){
+void _control_formatControls(){
 	// minidrones are taking commands mapped from -100 to 100% as input.
 	for(uint8_t i = 0; i < 4; ++i){
 		AETR[i] = map(rawInput[i], -controlData.resolution, controlData.resolution, -100, 100);
@@ -129,13 +129,13 @@ void control_formatControls(){
 // This is the channel order expected from TX, that you should check.
 // However, parrot AR minidrones use another order, which is Roll, Pitch, Yaw, Gaz, i.e. AERT.
 // This functions handles the conversion.
-void control_sendAETR(){
+void _control_sendAETR(){
 	ar_sendPCMD(AETR[0], AETR[1], AETR[3], AETR[2]);
 //	Serial.printf("AETR\t%i\t%i\t%i\t%i\n", AETR[0], AETR[1], AETR[3], AETR[2]);
 }
 
 // Send other channels (non-AETR) to buffers, on change.
-void control_sendControls(){
+void _control_sendControls(){
 	if(ch5 != prevCh5){
 		if(ch5){
 			ar_sendFlatTrim();
