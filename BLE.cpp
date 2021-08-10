@@ -1,7 +1,7 @@
 #include "BLE.h"
 
-BLEScan *pBLEScan;
-BLEClient *pClient;
+BLEScan *pBLEScan = NULL;
+BLEClient *pClient = NULL;
 
 BLERemoteCharacteristic *chrSendCommand;
 BLERemoteCharacteristic *chrSendCommandAck;
@@ -23,9 +23,9 @@ BLERemoteCharacteristic *chrUpdateFTPGetting;
 BLERemoteCharacteristic *chrUpdateFTPHandling;
 
 
-BLEAdvertisedDevice *rollingSpider;
-uint8_t scanTime = 5;
-bool connected = false;
+BLEAdvertisedDevice *rollingSpider = NULL;
+uint8_t bleScanTime = 5;
+bool bleConnected = false;
 //BLEAddress rollingSpiderAddress;
 
 static BLEUUID ARCOMMAND_SENDING_SERVICE_UUID("9a66fa00-0800-9191-11e4-012d1540cb8e");				// Send service
@@ -101,15 +101,16 @@ void ble_onReceiveAckLowLatency(BLERemoteCharacteristic* pBLERemoteCharacteristi
 class ClientCallbacks : public BLEClientCallbacks{
 	void onConnect(BLEClient* pClient){
 		Serial.println("connected !");
+		bleConnected = true;
 	}
 
 	void onDisconnect(BLEClient* pClient){
 		Serial.println("disconnected !");
-		for(uint8_t i = 0; i < 32; ++i){
+/*		for(uint8_t i = 0; i < 32; ++i){
 			Serial.print("#");
 		}
 		Serial.println();
-		connected = false;
+*/		bleConnected = false;
 	}
 };
 
@@ -122,8 +123,8 @@ class AdvertisedDeviceCallbacks : public BLEAdvertisedDeviceCallbacks{
 		
 		
 		BLEDevice::getScan()->stop();
-		rollingSpider = new BLEAdvertisedDevice(advertisedDevice);
-		connected = true;
+		*rollingSpider = BLEAdvertisedDevice(advertisedDevice);
+		bleConnected = true;
 
 		// note : we connect to the first rolling spider we find.
 		// Later we will try and use menus to display found devices on FrSky controller
@@ -143,39 +144,51 @@ void ble_init(){
 	pBLEScan->setActiveScan(true);
 	pBLEScan->setInterval(100);
 	pBLEScan->setWindow(99);
+
+	rollingSpider = new BLEAdvertisedDevice();
+
+	pClient = BLEDevice::createClient();
+	pClient->setClientCallbacks(new ClientCallbacks());
 }
 
 bool ble_scan(){
 //	Serial.println("Start scanning");
-	BLEScanResults devices = pBLEScan->start(scanTime, false);
+	BLEScanResults devices = pBLEScan->start(bleScanTime, false);
 //	Serial.printf("%i devices found.\n", devices.getCount());
 	pBLEScan->clearResults();
 
 //	Serial.println();
 
-	return connected;
+	return bleConnected;
 }
 
-// need to see that again. Maybe it's not needed to re-enumerate all services and characterictics if the connection has laready be made once ?
-void ble_connect(){
-	pClient = BLEDevice::createClient();
-	pClient->setClientCallbacks(new ClientCallbacks());
+void ble_firstConnect(){
 
-//	Serial.println("Connection...");
-
-	pClient->connect(rollingSpider);
-
-//	Serial.printf("connected to %s\n\n", pClient->getPeerAddress().toString().c_str());
+	ble_connect();
 
 	ble_setSendCharacteristics();
 	ble_setReceiveCharacteristics();
 //	ble_setHandshakeCharacteristics();
 
 //	ble_shakeHands();
+
+}
+
+void ble_connect(){
+
+//	Serial.println("Connection...");
+
+	pClient->connect(rollingSpider);
+
+//	Serial.printf("connected to %s\n\n", pClient->getPeerAddress().toString().c_str());
+}
+
+int ble_getRSSI(){
+	return pClient->getRssi();
 }
 
 bool ble_checkConnection(){
-	return connected;
+	return bleConnected;
 }
 
 

@@ -81,23 +81,23 @@ void control_formatControls(){
 	if(rawInput[4] > 0) ch5 = true; else ch5 = false;
 
 	prevCh6 = ch6;
-	if(rawInput[5] < -20){
+	if(rawInput[5] < -10){
 		ch6 = 0;
-	} else if(rawInput[5] > 20){
+	} else if(rawInput[5] > 10){
 		ch6 = 2;
 	} else {
 		ch6 = 1;
 	}
 
 	prevCh7 = ch7;
-	if(rawInput[6] < -20){
+	if(rawInput[6] < -10){
 		ch7 = 0;
 	} else {
 		ch7 = 1;
 	}
 
 	prevCh8 = ch8;
-	if(rawInput[7] < -20){
+	if(rawInput[7] < -10){
 		ch8 = 0;
 	} else {
 		ch8 = 1;
@@ -152,10 +152,12 @@ void control_sendControls(){
 	}
 
 	if(ch7 != prevCh7){
+//		Serial.println("ch7 triggered");
 		ar_sendTogglePilotingMode();
 	}
 	
 	if(ch8 != prevCh8){
+//		Serial.println("ch8 triggered");
 		if(ch8){
 			ar_sendBankedTurn(true);
 		} else {

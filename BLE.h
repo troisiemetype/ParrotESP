@@ -15,7 +15,10 @@ void ble_onReceiveAckLowLatency(BLERemoteCharacteristic* pBLERemoteCharacteristi
 
 void ble_init();
 bool ble_scan();
+void ble_firstConnect();
 void ble_connect();
+
+int ble_getRSSI();
 // see if I can : 
 // step up esp32 power level.
 // step up rollingspider power level as well.

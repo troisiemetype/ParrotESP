@@ -12,7 +12,7 @@ void setup(){
 		delay(100);
 	}
 
-	ble_connect();
+	ble_firstConnect();
 //	ble_enumerateServices();
 //	ble_askForSettings();
 	ar_sendAllSettings();
@@ -35,6 +35,8 @@ void loop(){
 	ar_checkReceiveBuffer();
 
 	telemetry_update();
+
+//	Serial.printf("rssi : %i\n", ble_getRSSI());
 }
 
 
