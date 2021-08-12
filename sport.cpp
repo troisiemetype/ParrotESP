@@ -22,7 +22,7 @@ hw_timer_t *sPortTimer = NULL;
 
 HardwareSerial sPort = HardwareSerial(2);
 
-uint8_t frame[10];
+uint8_t frame[11];
 
 uint8_t frameID = 0;
 
@@ -30,8 +30,9 @@ volatile bool sportUpdate = false;
 
 void sport_init(){
 	// baudrate, config, rx pin, tx pin, inverted
-	sPort.begin(57600, SERIAL_8N1, -1, PIN_SPORT, true);
 	pinMode(PIN_SPORT, OUTPUT);
+	sPort.begin(57600, SERIAL_8N1, -1, PIN_SPORT, true);
+
 
 	// use timer 1. Timer 0 is used by PPM input.
 	sPortTimer = timerBegin(1, 80, true);
@@ -82,64 +83,38 @@ void _sport_makeFrame(){
 	memset(frame, 0, 10);
 	uint16_t crc = 0;
 	
-	frame[0] = SPORT_HEADER;		// header answer from device connected to receiver
+	frame[0] = SPORT_START_STOP;
+	frame[1] = FRSKY_SPORT_DEVICE_24;
+	frame[2] = SPORT_HEADER;		// header answer from device connected to receiver
 
 	switch(frameID){
 		case 0:
-//			tools_uint16tToBuffer(RSSI_ID, &frame[1]);
-			frame[1] = 0x01;		// RSSI ID, low byte
-			frame[2] = 0xf1;		// RSSI ID, high byte.
-
+			tools_uint16tToBuffer(RSSI_ID, &frame[3]);
+			tools_uint32tToBuffer(0x64, &frame[5]);
 			break;
 		case 1:
-//			tools_uint16tToBuffer(ADC1_ID, &frame[1]);
-			frame[1] = 0x02;
-			frame[2] = 0xf1;
+			tools_uint16tToBuffer(ADC1_ID, &frame[3]);
+			tools_uint32tToBuffer(0x23, &frame[5]);
 			break;
 		case 2:
-//			tools_uint16tToBuffer(RAS_ID, &frame[1]);
-			frame[1] = 0x05;
-			frame[2] = 0xf1;
+			tools_uint16tToBuffer(RAS_ID, &frame[3]);
 			break;
 	}
 
-//	frame[1] = 0x01;		// RSSI ID, low byte
-//	frame[2] = 0xf1;		// RSSI ID, high byte.
-	tools_uint32tToBuffer(0x64, &frame[3]);
-//	frame[3] = 0x64;		// Four bytes of data.
-//	frame[4] = 0xcd;
-//	frame[5] = 0x00;
-//	frame[6] = 0x5e;
-//	frame[7] = 0x6c;
-
-	// This is the routine used in opentTX to check crc on received S.port packets.
-
-	for(uint8_t i = 1; i < 7; ++i){
+	for(uint8_t i = 2; i < 9; ++i){
 		crc += frame[i];
 		crc += crc >> 8;
 		crc &= 0xff;
 	}
 
-//	frame[7] = 65279 - 257 * crc;			// equivalent to 255 - crc. To be checked.
-	frame[7] = 0xff - crc;
+//	frame[9] = 65279 - 257 * crc;			// equivalent to 255 - crc. To be checked.
+	frame[9] = 0xff - crc;
 
-	sPort.write(SPORT_START_STOP);		// header from receiver to sensors
-	switch(frameID){
-		case 0:
-//			sPort.write(FRSKY_SPORT_DEVICE_24);
-//			break;
-		case 1:
-		case 2:
-			sPort.write(FRSKY_SPORT_DEVICE_24);
-			break;
-	}
-	sPort.write(frame, 8);
+	sPort.write(frame, 10);
 
 	if(++frameID > 2) frameID = 0;
 /*
-	Serial.printf("%02X\n", SPORT_START_STOP);
-	Serial.printf("%02X\n", FRSKY_SPORT_DEVICE_24);
-	for(uint8_t i = 0; i < 8; ++i){
+	for(uint8_t i = 0; i < 10; ++i){
 		Serial.printf("%02X\n", frame[i]);		
 	}
 	Serial.println();

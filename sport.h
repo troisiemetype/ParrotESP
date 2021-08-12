@@ -23,14 +23,8 @@
  *	S.port
  *	S.port is a telemetry protocol from FrSky.
  *	It's a half duplex serial link where a master polls slaves, and slaves responds when called.
- *	
- */
-
-/*
- *  Notes :
  *
- *  telemetry frames start with START_STOP == 0x7E
- *  Look at what is Byte Stuff      BYTESTUFF == 0X7D
+ *  A huge thanks to RomanLut@github for his help. I had telemetry working for the first time thanks to his advices.
  */
 
 #include <Arduino.h>
@@ -38,7 +32,7 @@
 #include "parrot_esp.h"
 
 #define SPORT_START_STOP		0x7e
-#define SPORT_HEADER			0x10
+#define SPORT_HEADER		  	0x10
 #define SPORT_BYTESTUFF			0x7d
 #define SPORT_SUTFF_MASK		0x20
 

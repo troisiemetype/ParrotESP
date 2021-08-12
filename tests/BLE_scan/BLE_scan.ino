@@ -14,7 +14,7 @@ BLEScan* pBLEScan;
 class MyAdvertisedDeviceCallbacks: public BLEAdvertisedDeviceCallbacks {
     void onResult(BLEAdvertisedDevice advertisedDevice) {
 
-      if(strncmp(advertisedDevice.getName().c_str(), "RS_", 3)) return;
+//      if(strncmp(advertisedDevice.getName().c_str(), "RS_", 3)) return;
 
       Serial.printf("Advertised Device: %s \n", advertisedDevice.toString().c_str());
 

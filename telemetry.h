@@ -25,6 +25,8 @@
 
 #if defined TELEMETRY_USE_SPORT
 #include "sport.h"
+#else
+#error "no protocol defined for telemetry."
 #endif
 
 void telemetry_init();
