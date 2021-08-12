@@ -18,10 +18,8 @@
 
 #include "parrot_esp.h"
 
-void setup(){
-	// Use for "debug" purpose only.
-	// Part of the debug informations use the log library made avaiable by the esp ide. Set debug level when compiling.
-	Serial.begin(115200);
+void initSystems(){
+
 //	testConvertTools();
 
 	// Init the commands buffers for communication flow with Minidrone	
@@ -45,13 +43,12 @@ void setup(){
 	ar_sendPreferredPilotingMode(2);
 
 	// Control from receiver initialisation
+	// TODO : inhibit control until the setup is totally made. Including flushing current state.
 	control_init();
 
-	// Telemetry initialisation.
-	telemetry_init();
 }
 
-void loop(){
+void mainLoop(){
 	// Check that connexion is sitll alive, or try to reconnect. Not really tried yet.
 	if(!ble_checkConnection()){
 		ble_connect();
@@ -65,10 +62,20 @@ void loop(){
 	ar_checkSendBuffer();
 	ar_checkSendWithAckBuffer();
 	ar_checkReceiveBuffer();
+}
 
+void setup(){
+	// Use for "debug" purpose only.
+	// Part of the debug informations use the log library made avaiable by the esp ide. Set debug level when compiling.
+	Serial.begin(115200);
+//	initSystems();
+	// Telemetry initialisation.
+	telemetry_init();
+}
+
+void loop(){
+//	mainLoop();
 	telemetry_update();
-
-//	Serial.printf("rssi : %i\n", ble_getRSSI());
 }
 
 

@@ -16,6 +16,14 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+/*
+#ifndef PARROT_ESP_TX_PROTOCOL
+#define PARROT_ESP_TX_PROTOCOL
+#else
+#error Please choose only one protocol for TX, in settings.h
+#endif
+*/
+
 #ifndef PARROT_ESP_SBUS_H
 #define PARROT_ESP_SBUS_H
 

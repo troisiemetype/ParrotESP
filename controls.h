@@ -41,10 +41,12 @@
 // Only one input protocol (from transmitter) should be #defined in the settings.h file.
 // TODO : implement a preprocessor guard for multiple definitions.
 
-#if defined TX_USE_PPM
+#if defined (TX_USE_PPM)
 #include "PPM.h"
-#elif defined TX_USE_SBUS
+#elif defined (TX_USE_SBUS)
 #include "SBUS.h"
+#else
+#error "no protocol defined for control input."
 #endif
 
 #define CONTROL_NUM_CHANNELS	NUM_CHANNELS

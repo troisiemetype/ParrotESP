@@ -46,6 +46,6 @@
 // S.bus onlyt settings
 #define PIN_SBUS_INPUT	PIN_RX
 
-//#define TELEMETRY_USE_SPORT
+#define TELEMETRY_USE_SPORT
 
 #endif

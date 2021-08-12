@@ -1,6 +1,11 @@
 From up to down :
-TX			CPPM
-RX			HeatBeat
+marking on X7 PCB		Found on Internet
+TX						CPPM
+RX						HeartBeat
 Vout
 Gnd
 S.port
+
+Note : when setting internal module, openTX (Q-X7) seem to only enable RX incase of inverted serial
+
+The pinout seems to be different on original JR modules :

@@ -20,7 +20,6 @@
 #define PARROT_ESP_H
 
 #include <Arduino.h>
-#include "CircularBuffer.h"
 
 #include "settings.h"
 #include "commons.h"
