@@ -43,9 +43,6 @@ void initSystems(){
 	ar_sendPreferredPilotingMode(2);
 
 	// Control from receiver initialisation
-	// TODO : inhibit control until the setup is totally made. Including flushing current state.
-	control_init();
-
 }
 
 void mainLoop(){
@@ -68,14 +65,14 @@ void setup(){
 	// Use for "debug" purpose only.
 	// Part of the debug informations use the log library made avaiable by the esp ide. Set debug level when compiling.
 	Serial.begin(115200);
-//	initSystems();
+	initSystems();
 	// Telemetry initialisation.
-	telemetry_init();
+//	telemetry_init();
 }
 
 void loop(){
-//	mainLoop();
-	telemetry_update();
+	mainLoop();
+//	telemetry_update();
 }
 
 

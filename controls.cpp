@@ -17,10 +17,12 @@
  */
 
 #include "controls.h"
+#include "espRCSbus.h"
 
-controlData_t controlData;
+espRCControls::controlData_t *controlData;
 
-int16_t rawInput[CONTROL_NUM_CHANNELS];
+espRCSbusIn controlIn(PIN_SBUS_INPUT, 1);
+
 int16_t AETR[4];
 
 bool ch5 = false;
@@ -34,53 +36,24 @@ uint8_t prevCh7 = 0;
 
 uint8_t ch8 = 0;
 uint8_t prevCh8 = 0;
-
+/*
 void control_init(){
-	memset(rawInput, 0, (CONTROL_NUM_CHANNELS * sizeof(int16_t)));
-	memset(&controlData, 0, sizeof(controlData_t));
-	controlData.channels = rawInput;
-	controlData.numChannels = CONTROL_NUM_CHANNELS;
 
-#if defined TX_USE_PPM
-	ppm_init();
-	controlData.resolution = ppm_getChannels()->resolution;
-#elif defined TX_USE_SBUS
-	sbus_init();
-	controlData.resolution = sbus_getChannels()->resolution;
-#endif
 }
+*/
 
+//TODO : inhibit control at beginning to avoid minidrone taking off alone.
 void control_update(){
-	bool update = false;
-	controlData_t *data;
+	if(controlIn.update()){
+		controlData = controlIn.getChannels();
 
-#if defined TX_USE_PPM
-	// "rawInput" is pre-foramtted : following the protocol used to decode channels, values are uint16_t, ranging from 0 to 1024.
-	// Each protocol function (PPM, S.bus, etc) should then modify them to have unified values 0-centered.
-
-	if(ppm_update()){
-		update = true;
-		data = ppm_getChannels();
-	}
-
-#elif defined TX_USE_SBUS
-
-	if(sbus_update()){
-		update = true;
-		data = sbus_getChannels();
-	}
-
-#endif
-
-	if(update){
-		memcpy(rawInput, data->channels, (CONTROL_NUM_CHANNELS * sizeof(int16_t)));
 		_control_formatControls();
 		_control_sendAETR();
 		_control_sendControls();		
 	}
 /*
 	for(uint8_t i = 0; i < CONTROL_NUM_CHANNELS; ++i){
-		Serial.printf("%i\t", rawInput[i]);
+		Serial.printf("%i\t", controlData->channel[i]);
 	}
 	Serial.println();
 */
@@ -89,33 +62,33 @@ void control_update(){
 void _control_formatControls(){
 	// minidrones are taking commands mapped from -100 to 100% as input.
 	for(uint8_t i = 0; i < 4; ++i){
-		AETR[i] = map(rawInput[i], -controlData.resolution, controlData.resolution, -100, 100);
+		AETR[i] = map(controlData->channel[i], -controlIn.getResolution(), controlIn.getResolution(), -100, 100);
 //		Serial.printf("%i\t", AETR[i]);
 	}
 
 //	Serial.println();
 
 	prevCh5 = ch5;
-	if(rawInput[4] > 0) ch5 = true; else ch5 = false;
+	if(controlData->channel[4] > 0) ch5 = true; else ch5 = false;
 
 	prevCh6 = ch6;
-	if(rawInput[5] < -10){
+	if(controlData->channel[5] < -10){
 		ch6 = 0;
-	} else if(rawInput[5] > 10){
+	} else if(controlData->channel[5] > 10){
 		ch6 = 2;
 	} else {
 		ch6 = 1;
 	}
 
 	prevCh7 = ch7;
-	if(rawInput[6] < -10){
+	if(controlData->channel[6] < -10){
 		ch7 = 0;
 	} else {
 		ch7 = 1;
 	}
 
 	prevCh8 = ch8;
-	if(rawInput[7] < -10){
+	if(controlData->channel[7] < -10){
 		ch8 = 0;
 	} else {
 		ch8 = 1;

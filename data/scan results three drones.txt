@@ -1,0 +1,17 @@
+
+Advertised Device: Name: RS_W272954, Address: a0:14:3d:68:51:ba, manufacturer data: 4300 cf19 0009 0100 
+RSSI: -60 
+Advertised Device: Name: Mars_225912, Address: e0:14:80:41:3d:c0, manufacturer data: 4300 cf19 0909 0100 
+RSSI: -60 
+Advertised Device: Name: Mambo_382772, Address: e0:14:e1:f2:3d:d0, manufacturer data: 4300 cf19 0b09 0100 
+RSSI: -70 
+
+Manufacturer data (bytes are transmitted little endian) :
+	2 bytes :	0x0043		Parrot bluetooth ID
+	2 bytes :	0x19cf		Parrot USB ID
+	2 bytes :	0x0900		Rolling spider			(ARDISCOVERY_PRODUCT_MINIDRONE)
+				0x0907		Airborne night			(							  _EVO_LIGHT)
+				0x0909		Airborne cargo			(							  _EVO_BRICK)
+				0x090a		Hydrofoil				(							  _EVO_HYDROFOIL)
+				0x090b		Mambo 					(							  _DELOS3)
+				0x0910		Swing					(							  _WINGX)
