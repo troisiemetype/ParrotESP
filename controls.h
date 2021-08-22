@@ -23,6 +23,8 @@
 
 #include "parrot_esp.h"
 
+#include "espRCSbus.h"
+
 /*
  *  Controls
  *
@@ -40,7 +42,7 @@
 
 #define CONTROL_NUM_CHANNELS	NUM_CHANNELS
 
-void control_init();
+void control_init(ARCommands *ar);
 void control_update();
 void _control_formatControls();
 void _control_sendAETR();

@@ -21,13 +21,12 @@
 
 #include <Arduino.h>
 
+#include "espARCommands.h"
+#include "espARNetwork.h"
+
 #include "settings.h"
-#include "commons.h"
 #include "tools.h"
 #include "SD.h"
-
-#include "BLE.h"
-#include "AR.h"
 
 #include "controls.h"
 #include "telemetry.h"

@@ -70,7 +70,7 @@
 
 // from openTX, frsky.h
 // FrSky new DATA IDs (2 bytes)
-#define ALT_FIRST_ID              0x0100D        
+#define ALT_FIRST_ID              0x010D        
 #define ALT_LAST_ID               0x010F
 #define VARIO_FIRST_ID            0x0110
 #define VARIO_LAST_ID             0x011F

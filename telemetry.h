@@ -23,14 +23,13 @@
 
 #include "parrot_esp.h"
 
-#if defined TELEMETRY_USE_SPORT
-#include "sport.h"
-#else
-#error "no protocol defined for telemetry."
-#endif
+#include "espRCSport.h"
 
-void telemetry_init();
+void telemetry_init(ARCommands *ar);
 
 bool telemetry_update();
+
+void telemetry_start();
+void telemetry_stop();
 
 #endif

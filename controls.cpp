@@ -17,11 +17,12 @@
  */
 
 #include "controls.h"
-#include "espRCSbus.h"
 
-espRCControls::controlData_t *controlData;
+RCControls::controlData_t *controlData;
 
-espRCSbusIn controlIn(PIN_SBUS_INPUT, 1);
+RCSbusIn controlIn(PIN_SBUS_INPUT, 1);
+
+ARCommands *md;
 
 int16_t AETR[4];
 
@@ -36,13 +37,14 @@ uint8_t prevCh7 = 0;
 
 uint8_t ch8 = 0;
 uint8_t prevCh8 = 0;
-/*
-void control_init(){
 
+void control_init(ARCommands *ar){
+	md = ar;
+	memset(AETR, 0, sizeof(int16_t) * 4);
 }
-*/
 
-//TODO : inhibit control at beginning to avoid minidrone taking off alone.
+
+//TODO : inhibit control at beginning to avoid md taking off alone.
 void control_update(){
 	if(controlIn.update()){
 		controlData = controlIn.getChannels();
@@ -60,7 +62,7 @@ void control_update(){
 }
 
 void _control_formatControls(){
-	// minidrones are taking commands mapped from -100 to 100% as input.
+	// mds are taking commands mapped from -100 to 100% as input.
 	for(uint8_t i = 0; i < 4; ++i){
 		AETR[i] = map(controlData->channel[i], -controlIn.getResolution(), controlIn.getResolution(), -100, 100);
 //		Serial.printf("%i\t", AETR[i]);
@@ -69,7 +71,7 @@ void _control_formatControls(){
 //	Serial.println();
 
 	prevCh5 = ch5;
-	if(controlData->channel[4] > 0) ch5 = true; else ch5 = false;
+	if(controlData->channel[4] > 10) ch5 = true; else ch5 = false;
 
 	prevCh6 = ch6;
 	if(controlData->channel[5] < -10){
@@ -100,10 +102,10 @@ void _control_formatControls(){
 // send last read commands from radio to buffers for BLE
 // nota : universally used channel order in RC products is AETR : Aileron, Elevator, Throttle, Rudder.
 // This is the channel order expected from TX, that you should check.
-// However, parrot AR minidrones use another order, which is Roll, Pitch, Yaw, Gaz, i.e. AERT.
+// However, parrot AR mds use another order, which is Roll, Pitch, Yaw, Gaz, i.e. AERT.
 // This functions handles the conversion.
 void _control_sendAETR(){
-	ar_sendPCMD(AETR[0], AETR[1], AETR[3], AETR[2]);
+	md->sendPCMD(AETR[0], AETR[1], AETR[3], AETR[2]);
 //	Serial.printf("AETR\t%i\t%i\t%i\t%i\n", AETR[0], AETR[1], AETR[3], AETR[2]);
 }
 
@@ -111,11 +113,11 @@ void _control_sendAETR(){
 void _control_sendControls(){
 	if(ch5 != prevCh5){
 		if(ch5){
-			ar_sendFlatTrim();
-			ar_sendTakeOff();
+			md->sendFlatTrim();
+			md->sendTakeOff();
 //			Serial.println("send take off");
 		} else {
-			ar_sendLanding();
+			md->sendLanding();
 //			Serial.println("send landing");
 		}
 	}
@@ -124,35 +126,35 @@ void _control_sendControls(){
 //		Serial.println("ch6 triggered");
 		switch(ch6){
 			case 1:
-				ar_sendMaxTilt(20);
-				ar_sendMaxVerticalSpeed(1.2);
-				ar_sendMaxRotationSpeed(180);
+				md->sendMaxTilt(20);
+				md->sendMaxVerticalSpeed(1.2);
+				md->sendMaxRotationSpeed(180);
 				break;
 			case 2:
-				ar_sendMaxTilt(25);
-				ar_sendMaxVerticalSpeed(2.0);
-				ar_sendMaxRotationSpeed(360);
+				md->sendMaxTilt(25);
+				md->sendMaxVerticalSpeed(2.0);
+				md->sendMaxRotationSpeed(360);
 				break;
 			case 0:
 			default:
-				ar_sendMaxTilt(10);
-				ar_sendMaxVerticalSpeed(0.6);
-				ar_sendMaxRotationSpeed(120);
+				md->sendMaxTilt(10);
+				md->sendMaxVerticalSpeed(0.6);
+				md->sendMaxRotationSpeed(120);
 				break;
 		}
 	}
 
 	if(ch7 != prevCh7){
 //		Serial.println("ch7 triggered");
-		ar_sendTogglePilotingMode();
+		md->sendTogglePilotingMode();
 	}
 	
 	if(ch8 != prevCh8){
 //		Serial.println("ch8 triggered");
 		if(ch8){
-			ar_sendBankedTurn(true);
+			md->sendBankedTurn(true);
 		} else {
-			ar_sendBankedTurn(false);
+			md->sendBankedTurn(false);
 		}
 	}
 }

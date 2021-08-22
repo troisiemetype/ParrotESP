@@ -84,7 +84,7 @@ void _sport_makeFrame(){
 	uint16_t crc = 0;
 	
 	frame[0] = SPORT_START_STOP;
-	frame[1] = FRSKY_SPORT_DEVICE_24;
+	frame[1] = FRSKY_SPORT_DEVICE_1;
 	frame[2] = SPORT_HEADER;		// header answer from device connected to receiver
 
 	switch(frameID){
@@ -93,11 +93,11 @@ void _sport_makeFrame(){
 			tools_uint32tToBuffer(0x64, &frame[5]);
 			break;
 		case 1:
-			tools_uint16tToBuffer(ADC1_ID, &frame[3]);
-			tools_uint32tToBuffer(0x23, &frame[5]);
+//			tools_uint16tToBuffer(ADC1_ID, &frame[3]);
+//			tools_uint32tToBuffer(0x23, &frame[5]);
 			break;
 		case 2:
-			tools_uint16tToBuffer(RAS_ID, &frame[3]);
+//			tools_uint16tToBuffer(RAS_ID, &frame[3]);
 			break;
 	}
 

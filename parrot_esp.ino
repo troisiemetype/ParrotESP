@@ -18,47 +18,40 @@
 
 #include "parrot_esp.h"
 
+ARCommands minidrone;
+ARNetwork mdLink(&minidrone);
+
 void initSystems(){
 
 //	testConvertTools();
+	mdLink.init();
 
-	// Init the commands buffers for communication flow with Minidrone	
-	ar_init();
+	telemetry_init(&minidrone);
 
-	// Init the BLE layer, then scan BLE servers around. (note : Minidrones are servers, the controller is a client connecting to it)
-	ble_init();
-	for(;;){
-		if(ble_scan()) break;
-		delay(100);
-	}
+	control_init(&minidrone);
 
-	// Initialize connexion. Connects to found device, then enumerate services and characteristics needed.
-	ble_firstConnect();
-//	ble_enumerateServices();
-//	ble_askForSettings();
-
-	// Once connexion is done, Minidrone is asked to enumerate its current settings, before it can accept any command.
-	ar_sendAllSettings();
+	minidrone.sendAllSettings();
 	// Optionnal
-	ar_sendPreferredPilotingMode(2);
+	minidrone.sendPreferredPilotingMode(2);
 
-	// Control from receiver initialisation
+	telemetry_start();
 }
 
 void mainLoop(){
 	// Check that connexion is sitll alive, or try to reconnect. Not really tried yet.
-	if(!ble_checkConnection()){
-		ble_connect();
+	if(!mdLink.checkConnection()){
+		telemetry_stop();
+		if(mdLink.checkConnection()) telemetry_start();
 		return;
 	}
 
-	// check for new controls from trasmitter.
+	// check for new controls from transmitter.
 	control_update();
 
-	// Check communication buffers.
-	ar_checkSendBuffer();
-	ar_checkSendWithAckBuffer();
-	ar_checkReceiveBuffer();
+	minidrone.update();
+	mdLink.update();
+//	Serial.printf("RSSI : %i\n", mdLink.getRSSI());
+	telemetry_update();
 }
 
 void setup(){
@@ -68,6 +61,7 @@ void setup(){
 	initSystems();
 	// Telemetry initialisation.
 //	telemetry_init();
+
 }
 
 void loop(){
